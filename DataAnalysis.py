@@ -288,7 +288,7 @@ class DataPreprocessing () :
         self.drop_data(self.drop_cols)
 
         if return_anomaly is True :
-            self.df, df_anomaly = DataModify.data_anomaly_del(self.df, return_anomaly=True)
+            self.df, df_anomaly = DataModify.data_anomaly_edit(self.df, return_anomaly=True)
         else :
             self.df = DataModify.data_anomaly_edit(self.df, return_anomaly=False)
 
@@ -405,7 +405,7 @@ class DataVisualize () :
         ratio_df = df.groupby(group_col)['Alive'].value_counts(normalize=True).unstack().fillna(0)
         
         # 그래프 그리기
-        plt.figure(figsize=(6,6))
+        plt.figure(figsize=(10,6))
         ratio_df.plot(kind='bar', stacked=True, colormap="Set2")
 
         plt.title(f"{col} 기준 {threshold}에 따른 Alive 상태 비율")
@@ -414,7 +414,6 @@ class DataVisualize () :
         plt.ylim(0,1)
         plt.legend(["Dead", "Harvested", "Alive"], title="Alive", bbox_to_anchor=(1.05,1), loc='upper left')
         plt.xticks(rotation=0)
-        plt.tight_layout()
         plt.show()
 
     # 시간에 따라 나무 상태의 변화를 나타낸 그래프 출력
