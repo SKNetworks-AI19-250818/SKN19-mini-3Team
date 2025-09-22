@@ -220,12 +220,12 @@
   <tr>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/01_show_box_plot_for_continuous_value.png" 
-           style="max-width: 100%; height: 350px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="연속형 변수 특성별 값 분포">
     </td>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/02_show_anomaly_score.png" 
-           style="max-width: 100%; max-height: 350px; width: auto; height: auto;"
+           style="max-width: 100%; max-height: 300px; width: auto; height: auto;"
            alt="Isolation Forest Decision Function Score 이상치 탐색">
     </td>
   </tr>
@@ -270,12 +270,12 @@
   <tr>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/04_show_chemical_relation_scatter_01.png" 
-           style="max-width: 100%; height: 350px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="Lignin vs Phenolics 상관관계">
     </td>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/04_show_chemical_relation_scatter_02.png" 
-           style="max-width: 100%; height: 350px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="NSC vs Phenolics 상관관계">
     </td>
   </tr>
@@ -290,12 +290,12 @@
   <tr>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/04_show_chemical_relation_scatter_03.png" 
-           style="max-width: 100%; height: 350px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="Lignin vs NSC 상관관계">
     </td>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/07_show_chemical_histogram.png" 
-           style="max-width: 100%; height: 350px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="Phenolics 농도 분포">
     </td>
   </tr>
