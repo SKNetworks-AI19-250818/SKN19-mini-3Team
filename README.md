@@ -261,6 +261,10 @@ https://github.com/SKNetworks-AI19-250818/SKN19-mini-3Team/blob/7592da347bb285f3
 </div>
 <br></br>
 
+내재 화합물 간의 관계성
+Phenolics vs Lignin : 둘 다 식물의 방어와 세포벽 강화에 관여 (비례 관계)
+Phenolics vs NSC : NSC는 저장물질로 페놀산 생산에 필요한 에너지원 (NCS이 많으면 페놀산도 많음, 비례 관계)
+NSC vs Lignin : NSC는 단기 저장, 리그닌은 장기 구조 강화 목적 (어릴수록 NSC가 성숙할수록 리그닌이 많음)
 
 <br></br>
 <div align="center">
