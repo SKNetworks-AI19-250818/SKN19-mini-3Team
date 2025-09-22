@@ -91,20 +91,191 @@
 
 3. **목적**
 
-   * 데적
+   * 데이터 기반으로 **어떤 나무가 어떤 조건에서 잘 자라는지** 과학적으로 규명
+   * 도시 수목원·녹지 공간 조성을 위한 **최적 입지 및 관리 전략 제시**
+   * 결과적으로, 도시민에게 **건강한 쉼터 제공 + 지속 가능한 도시 생태계 구축**
 
+---
+
+## 📌 우리는 데이터를 어떻게 활용할 것인가? (How)
+
+### 🔍 **데이터셋 개요**
+* [**Tree\_Data.csv**](https://www.kaggle.com/datasets/yekenot/tree-survival-prediction/data): **2,783개 샘플, 24개 특성**
+  * **환경적 요인**: 빛 조건(Light_ISF, Light_Cat), 토양 유형(Soil), 멸균 처리(Sterile)
+  * **생물학적 요인**: 균근균(AMF, EMF), 동종/이종 식물(Conspecific), 균근 처리(Myco, SoilMyco)
+  * **화학적 성분**: 페놀릭스(Phenolics), 리그닌(Lignin), 비구조탄수화물(NSC)
+  * **시간적 요인**: 식재일(PlantDate), 관찰 시점(Time)
+  * **결과 변수**: 생존 여부(Alive)
+
+### 📊 **분석 목표**
+1. **생존율에 영향을 주는 주요 요인** 규명 (빛, 토양, 멸균 여부, 균근, 화학 성분 등)
+2. **종별 최적 조건** 도출 (예: 어떤 수종은 저광량에서도 잘 자라고, 어떤 종은 특정 토양에서만 생존율이 높음)
+3. **경제적 관리 전략** 제시 (초기 묘목의 생존 가능성을 높여 재조림 비용 절감)
+
+### 🎯 **기대 결과**
+* "이 종은 XX 토양+빛 조건에서 가장 잘 생존한다" 같은 **가이드라인 제공**
+* 도심 내 수목원 조성 시 **데이터 기반 의사결정** 지원
+
+---
+
+## 🔧 **기술적 구현 (Technical Implementation)**
+
+### 📁 **프로젝트 구조**
+```
+├── data/
+│   └── Tree_Data.csv        # 분석용 원본 데이터 (2,783 rows × 23 columns)
+├── DataAnalysis.py          # 데이터 분석 통합 모듈
+└── main.ipynb               # 실행용 노트북
+```
+
+### 🏗️ **데이터 분석 파이프라인**
+
+#### **1️⃣ DataCheck 클래스** - 데이터 품질 검증
+```python
+# 핵심 메서드
+├── set_categorical_threshold()     # 범주형/연속형 구분 기준 설정
+├── return_cols()                   # 데이터 타입별 컬럼 분류
+├── print_info()                    # 기초 통계 및 데이터 정보 출력  
+├── print_value_counts()            # 범주형 변수 분포 확인
+└── save_to_csv()                   # 처리된 데이터 저장
+```
+
+#### **2️⃣ DataPreprocessing 클래스** - 데이터 전처리 
+```python
+# 전처리 파이프라인
+├── call_raw_data()          # 원본 데이터 로드
+├── drop_data()              # 불필요한 컬럼 제거
+├── fill_na()                # 결측치 처리 (Harvest, Alive, EMF)
+├── category_encoding()      # 범주형 데이터 인코딩 (Label/OneHot)
+├── set_date()               # 날짜 형식 통일
+├── merge_label()            # Event, Harvest, Alive → 통합 라벨링
+└── run()                    # 전체 전처리 파이프라인 실행
+```
+
+#### **3️⃣ DataModify 클래스** - 데이터 정제 및 모델링 준비
+```python  
+# 데이터 정제 및 분할
+├── data_anomaly_edit()      # 이상치 탐지 및 제거 (Alive, Phenolics, NSC, Lignin)
+├── split_feature_label()    # Feature-Label 분리 및 Train/Test 분할
+└── scale_data()             # 연속형 변수 표준화 (StandardScaler)
+```
+
+#### **4️⃣ DataVisualize 클래스** - 통계적 시각화
+```python
+# 탐색적 데이터 분석 (EDA)
+├── show_boxplot_for_continuous_value()           # 연속형 변수 분포 시각화
+├── show_anomaly_score()                          # Isolation Forest 이상치 스코어링
+├── show_heatmap_for_continuous_value()           # 변수간 상관관계 히트맵
+├── show_survival_ratio()                         # 범주별 생존율 분석
+├── show_survival_ratio_with_threshold()          # 임계값 기반 생존율 분석  
+├── show_alive_about_time()                       # 시간별 생존율 추이
+├── show_survival_heatmap_by_soil()               # 토양-종별 생존율 매트릭스
+├── show_chemical_histogram()                     # 화학성분 분포 히스토그램
+├── show_chemical_relation_scatter()              # 화학성분 간 상관관계
+├── show_chemical_relation_by_survive()           # 생존여부별 화학성분 분석
+└── show_hitmap_by_Myco()                         # 균근 처리 교차분석
+```
+
+### ⚙️ **핵심 기술적 특징**
+* **모듈형 설계**: 각 클래스별 독립적 기능으로 유지보수성 확보
+* **이상치 처리**: Isolation Forest 알고리즘을 활용한 자동화된 이상치 탐지
+* **다중 인코딩 지원**: Label Encoding과 One-Hot Encoding 선택적 적용
+* **표준화**: 연속형 변수에 대한 StandardScaler 적용으로 모델 성능 최적화
+* **시각화 중심**: 13개 전문 시각화 메서드로 데이터 패턴 직관적 분석
+
+---
+## 🔧 **EDA 탐색적 데이터 분석 결과**
+
+### 🏗️ **데이터 분석 파이프라인**
+
+#### **1️⃣ 데이터 로드**
+- **원본 데이터 (Tree_Data.csv)**: 2,783개 샘플, 24개 변수 (결측치 존재)
+- **전처리된 데이터 (Tree_Data_processing.csv)**: 2,783개 샘플, 16개 변수 (결측치 제거 완료)
+- **타겟 변수**: Alive (생존=2, 수확=1, 사망=0)
+
+#### **2️⃣ 데이터 구조 및 기초 통계 확인**
+
+**연속형 변수 기초 통계**
+- **Light_ISF**: 평균=0.086, 최소=0.032, 최대=0.161
+- **AMF**: 평균=20.553, 최소=0, 최대=100
+- **EMF**: 평균=12.206, 최소=0, 최대=87.5
+- **Phenolics**: 평균=1.933, 최소=-1.35, 최대=6.1
+- **Lignin**: 평균=15.760, 최소=2.23, 최대=32.77
+- **NSC**: 평균=14.220, 최소=4.3, 최대=29.45
+- **Time**: 평균=53.487, 최소=14, 최대=115.5
+
+**전체 생존율**
+- **Alive=0**: 1,587개 (57.0%) - 사망(Dead)
+- **Alive=1**: 491개 (17.6%) - 수확(Harvested) 
+- **Alive=2**: 704개 (25.3%) - 생존(Alive)
+- **Alive=3**: 1개 (0.0%) - 이상치
+
+#### **3️⃣ 결측치 및 이상치 탐색**
+- **결측치**: 전처리 과정에서 모든 결측치 제거 완료
+- **이상치**: Isolation Forest 알고리즘으로 이상치 탐지 및 처리
+- **데이터 품질**: 모든 변수에서 일관된 데이터 타입과 범위 확인
+<br></br>
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/01_show_box_plot_for_continuous_value.png" 
+           style="max-width: 100%; height: 500px; width: auto; object-fit: contain;"
+           alt="연속형 변수 특성별 값 분포">
+    </td>
+    <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/02_show_anomaly_score.png" 
+           style="max-width: 100%; max-height: 450px; width: auto; height: auto;"
+           alt="Isolation Forest Decision Function Score 이상치 탐색">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>연속형 변수 특성별 값 분포</em>
+    </td>
+    <td align="center">
+      <em>Isolation Forest Decision Function Score 이상치 탐색</em>
+    </td>
+  </tr>
+</table>
+</div>
+
+#### **4️⃣ 데이터 시각화를 통한 탐색**
+<div align="center">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/03_show_heatmap_for_continuous_value.png" 
+           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           alt="연속형 변수 간 상관관계 히트맵">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>연속형 변수 간 상관관계 히트맵</em>
+    </td>
+  </tr>
+</table>
+</div>
+<br></br>
+
+**🧪 화학 성분 영향 분석**
+- **Phenolics 고농도**: 34.0% vs 저농도 1.3%
+- **Lignin 고농도**: 33.9% vs 저농도 1.5%  
+- **NSC 고농도**: 31.5% vs 저농도 3.8%
+- **📈 핵심 발견**: 모든 화학 성분에서 고농도가 생존율 크게 향상
 <br></br>
 <div align="center">
 <table>
   <tr>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/04_show_chemical_relation_scatter_01.png" 
-           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
            alt="Lignin vs Phenolics 상관관계">
     </td>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/04_show_chemical_relation_scatter_02.png" 
-           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
            alt="NSC vs Phenolics 상관관계">
     </td>
   </tr>
@@ -119,12 +290,12 @@
   <tr>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/04_show_chemical_relation_scatter_03.png" 
-           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
            alt="Lignin vs NSC 상관관계">
     </td>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/07_show_chemical_histogram.png" 
-           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
            alt="Phenolics 농도 분포">
     </td>
   </tr>
@@ -139,12 +310,19 @@
 </table>
 </div>
 
-**🧪 화학 성분 영향 분석**
-- **Phenolics 고농도**: 34.0% vs 저농도 1.3%
-- **Lignin 고농도**: 33.9% vs 저농도 1.5%  
-- **NSC 고농도**: 31.5% vs 저농도 3.8%
-- **📈 핵심 발견**: 모든 화학 성분에서 고농도가 생존율 크게 향상
+**🍄 균근 처리 효과 분석**
+- **균근 미처리**: 21/1,500 (1.4%)
+- **균근 처리**: 470/1,283 (36.6%)
+- **📈 핵심 발견**: 균근 처리가 생존율을 **26배 향상**시킴
 
+**🏔️ 토양 타입별 생존율**
+- 토양 0: 19.1%, 토양 1: 18.4%, **토양 2: 20.2%** (최고)
+- 토양 3: 17.4%, 토양 4: 17.7%, 토양 5: 16.4%, 토양 6: 14.2%
+
+**🔬 균근균 타입별 효과**
+- **AMF 높음(>20)**: 164/1,112 (14.7%)
+- **EMF 높음(>20)**: 370/875 (42.3%)
+- **📈 핵심 발견**: EMF가 AMF보다 **3배 효과적**
 
 <div align="center">
 <table>
@@ -163,17 +341,10 @@
 </table>
 </div>
 
-**🍄 균근 처리 효과 분석**
-- **균근 미처리**: 210/1,500 (14.0%)
-- **균근 처리**: 494/1,283 (38.5%)
-- **📈 핵심 발견**: 균근 처리가 생존율을 **2.75배 향상**시킴
-
-
-**🔬 균근균 타입별 효과**
-- **AMF 높음(>20)**: 228/1,112 (20.5%)
-- **EMF 높음(>20)**: 268/875 (30.6%)
-- **📈 핵심 발견**: EMF가 AMF보다 **1.5배 효과적**
-
+**⏰ 시간대별 생존 패턴**
+- 초기~중기(~90일): 0% (모두 사망 상태)
+- **장기(90일~)**: 491/494 (99.4%)
+- 📊 **인사이트**: 90일 이후 관찰된 나무들은 대부분 생존
 
 <div align="center">
 <table>
@@ -191,12 +362,6 @@
   </tr>
 </table>
 </div>
-
-**⏰ 시간대별 생존 패턴**
-- 초기~중기(~90일): 0% (모두 사망 상태)
-- **장기(90일~)**: 491/494 (99.4%)
-- 📊 **인사이트**: 90일 이후 관찰된 나무들은 대부분 생존
-
 
 #### **5️⃣ 데이터 정제 및 전처리**
 
@@ -230,33 +395,38 @@
 
 ### 💡 **주요 발견 사항**
 
-1. **🍄 균근 처리의 유의미한 효과**
-   - 균근 처리 시 생존율 **14.0% → 38.5%** (2.8배 향상)
-   - EMF 균근균이 AMF보다 1.5배 효과적 (30.6% vs 20.5%)
+1. **🍄 균근 처리의 압도적 효과**
+   - 균근 처리 시 생존율 **1.4% → 36.6%** (26배 향상)
+   - EMF 균근균이 AMF보다 3배 효과적 (42.3% vs 14.7%)
 
-2. **🧪 화학 성분의 결정적 역할**
-   - Phenolics 고농도: 37.3% vs 저농도 17.6% (2.1배 향상)
-   - 식물 내 방어 화합물이 생존에 핵심적 역할
+2. **🏔️ 토양의 중요성**
+   - 토양 타입 2에서 가장 높은 생존율 (20.2%)
+   - 균근 처리 + 토양 타입 2 조합 시 **45.3%** 달성
 
-3. **⏰ 실험 설계의 특성**
-   - 90일 이상: 실험 목적상 의도적 수확으로 실험 종료
-   - 초기 90일이 생존 결정의 **Critical Period**
+3. **🧪 화학 성분의 결정적 역할**
+   - 고농도 화학 성분(Phenolics, Lignin, NSC)에서 생존율 **20배 이상** 향상
+   - 식물 내 방어 화합물과 에너지 저장 물질이 생존에 핵심
+
+4. **⏰ 시간의 선별 효과**
+   - 90일 이후까지 생존한 나무들은 99.4% 장기 생존
+   - 초기 90일이 생존의 **Critical Period**
 
 ### 🏢 **도시 수목원 조성 전략**
 
 #### **📋 최적 식재 가이드라인**
-1. **필수 조건**: 균근 처리 (생존율 2.8배 향상)
-2. **균근균**: EMF(외생균근균) 접종 우선 (AMF보다 1.5배 효과적)
-3. **관리 집중**: 식재 후 90일간 집중 관리
+1. **필수 조건**: 균근 처리 (생존율 26배 향상)
+2. **토양 선택**: 토양 타입 2 우선 사용
+3. **균근균**: EMF(외생균근균) 접종 우선
+4. **관리 집중**: 식재 후 90일간 집중 관리
 
 #### **💰 경제적 효과**
-- 기존 생존율 14.0% → 개선 후 **34.4%** (2.5배 향상)
+- 기존 생존율 1.4% → **개선 후 45.3%** (32배 향상)
 - 균근 처리를 통한 대폭적인 생존율 향상으로 재조림 비용 절감 효과 기대
 - 정확한 경제적 효과는 추가적인 비용-편익 분석 필요
 
 #### **🌱 지속가능한 도시 생태계 구축**
 - 데이터 기반 과학적 식재로 **건강한 쉼터 공간** 제공
-- 초기 90일 집중 관리를 통한 **효율적 자원 배분**
+- 기후변화 대응을 위한 **효과적인 녹지 네트워크** 구축
 - 시민 삶의 질 향상과 **환경 개선 동시 달성**
 
 ---
