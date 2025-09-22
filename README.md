@@ -30,6 +30,20 @@
       <b>장효정</b>
     </td>
   </tr>
+  <tr>
+    <td align="center" width="200px">
+      <a href="mailto:deneb784@gmail.com"> GitHub</a>
+    </td>
+    <td align="center" width="200px">
+      <a href="mailto:vfxpedia1987@kakao.com"> GitHub</a>
+    </td>
+    <td align="center" width="200px">
+      <a href="mailto:colaa222@gmail.com"> GitHub</a>
+    </td>
+    <td align="center" width="200px">
+      <a href="mailto:koulsh3663@gmail.com"> GitHub</a>
+    </td>
+  </tr>
 </table>
 
 </div>
@@ -67,6 +81,7 @@
 
    * [도심 속 녹지 부족](https://www.kunews.ac.kr/news/articleView.html?idxno=42843#:~:text=%ED%9C%B4%EC%8B%9D%C2%B7%EB%8C%80%ED%99%94%20%EA%B3%B5%EA%B0%84%20%EC%97%86%EC%96%B4%20%EC%B9%B4%ED%8E%98%EB%A1%9C%E2%80%9D%ED%95%9C%EA%B0%95%EA%B3%B5%EC%9B%90%EA%B3%BC%20%EA%B1%B0%EC%A3%BC%EC%A7%80%EC%97%AD%20%EA%B0%80%EB%A5%B8%20%EB%8F%84%EB%A1%9C%EB%93%A4%EC%84%A0%ED%98%95%EA%B3%B5%EC%9B%90%2C,%EC%84%9C%EC%9A%B8%EC%8B%9C%2025%EA%B0%9C%20%EC%9E%90%EC%B9%98%EA%B5%AC%20%EC%A4%91%203%EB%B2%88%EC%A7%B8%EB%A1%9C%20%EB%85%B9%EC%A7%80%EC%9C%A8%EC%9D%B4%20%EB%82%AE%EB%8B%A4.) → '쉼'의 공간 부족
    * 초기 수목 생존 실패로 인한 경제적 손실 및 관리 효율 저하
+<br></br>
 <div align="center">
 <img src="./data/Problem_01.png" width="50%" height="50%" alt="도심 속 녹지 부족">
 </div>
@@ -85,7 +100,7 @@
 ## 📌 우리는 데이터를 어떻게 활용할 것인가? (How)
 
 ### 🔍 **데이터셋 개요**
-* [**Tree\_Data.csv**](https://www.kaggle.com/datasets/yekenot/tree-survival-prediction/data): **2,783개 샘플, 23개 특성**
+* [**Tree\_Data.csv**](https://www.kaggle.com/datasets/yekenot/tree-survival-prediction/data): **2,783개 샘플, 24개 특성**
   * **환경적 요인**: 빛 조건(Light_ISF, Light_Cat), 토양 유형(Soil), 멸균 처리(Sterile)
   * **생물학적 요인**: 균근균(AMF, EMF), 동종/이종 식물(Conspecific), 균근 처리(Myco, SoilMyco)
   * **화학적 성분**: 페놀릭스(Phenolics), 리그닌(Lignin), 비구조탄수화물(NSC)
@@ -174,9 +189,9 @@
 ### 🏗️ **데이터 분석 파이프라인**
 
 #### **1️⃣ 데이터 로드**
-- **데이터 크기**: 2,783개 샘플, 23개 변수
-- **타겟 변수**: Alive (생존=1, 사망=0)
-- **결측치**: 모든 변수에서 결측치 없음 (전처리 완료)
+- **원본 데이터 (Tree_Data.csv)**: 2,783개 샘플, 24개 변수 (결측치 존재)
+- **전처리된 데이터 (Tree_Data_processing.csv)**: 2,783개 샘플, 16개 변수 (결측치 제거 완료)
+- **타겟 변수**: Alive (생존=2, 수확=1, 사망=0)
 
 #### **2️⃣ 데이터 구조 및 기초 통계 확인**
 
@@ -190,34 +205,115 @@
 - **Time**: 평균=53.487, 최소=14, 최대=115.5
 
 **전체 생존율**
-- **생존**: 491개 (17.6%)
-- **사망**: 1,587개 (82.4%)
-
-<div align="center">
-<img src="./data/visual_print/01_show_box_plot_for_continuous_value.png" width="80%" height="60%" alt="연속형 변수 분포">
-<img src="./data/visual_print/02_show_anomaly_score.png" width="80%" height="60%" alt="연속형 변수 분포2">
-</div>
+- **Alive=0**: 1,587개 (57.0%) - 사망(Dead)
+- **Alive=1**: 491개 (17.6%) - 수확(Harvested) 
+- **Alive=2**: 704개 (25.3%) - 생존(Alive)
+- **Alive=3**: 1개 (0.0%) - 이상치
 
 #### **3️⃣ 결측치 및 이상치 탐색**
 - **결측치**: 전처리 과정에서 모든 결측치 제거 완료
 - **이상치**: Isolation Forest 알고리즘으로 이상치 탐지 및 처리
 - **데이터 품질**: 모든 변수에서 일관된 데이터 타입과 범위 확인
+<br></br>
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/01_show_box_plot_for_continuous_value.png" 
+           style="max-width: 100%; height: 500px; width: auto; object-fit: contain;"
+           alt="연속형 변수 특성별 값 분포">
+    </td>
+    <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/02_show_anomaly_score.png" 
+           style="max-width: 100%; max-height: 450px; width: auto; height: auto;"
+           alt="Isolation Forest Decision Function Score 이상치 탐색">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>연속형 변수 특성별 값 분포</em>
+    </td>
+    <td align="center">
+      <em>Isolation Forest Decision Function Score 이상치 탐색</em>
+    </td>
+  </tr>
+</table>
+</div>
 
 #### **4️⃣ 데이터 시각화를 통한 탐색**
-
 <div align="center">
-<img src="./data/visual_print/03_show_heatmap_for_continuous_value.png" width="80%" height="60%" alt="heatmap">
-<img src="./data/visual_print/02_show_anomaly_score.png" width="80%" height="60%" alt="연속형 변수 분포2">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/03_show_heatmap_for_continuous_value.png" 
+           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           alt="연속형 변수 간 상관관계 히트맵">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>연속형 변수 간 상관관계 히트맵</em>
+    </td>
+  </tr>
+</table>
+</div>
+<br></br>
+
+**🧪 화학 성분 영향 분석**
+- **Phenolics 고농도**: 34.0% vs 저농도 1.3%
+- **Lignin 고농도**: 33.9% vs 저농도 1.5%  
+- **NSC 고농도**: 31.5% vs 저농도 3.8%
+- **📈 핵심 발견**: 모든 화학 성분에서 고농도가 생존율 크게 향상
+<br></br>
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/04_show_chemical_relation_scatter_01.png" 
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           alt="Lignin vs Phenolics 상관관계">
+    </td>
+    <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/04_show_chemical_relation_scatter_02.png" 
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           alt="NSC vs Phenolics 상관관계">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>Lignin vs Phenolics 상관관계</em>
+    </td>
+    <td align="center">
+      <em>NSC vs Phenolics 상관관계</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/04_show_chemical_relation_scatter_03.png" 
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           alt="Lignin vs NSC 상관관계">
+    </td>
+    <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/07_show_chemical_histogram.png" 
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           alt="Phenolics 농도 분포">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>Lignin vs NSC 상관관계</em>
+    </td>
+    <td align="center">
+      <em>Phenolics 농도 분포</em>
+    </td>
+  </tr>
+</table>
 </div>
 
 **🍄 균근 처리 효과 분석**
 - **균근 미처리**: 21/1,500 (1.4%)
 - **균근 처리**: 470/1,283 (36.6%)
 - **📈 핵심 발견**: 균근 처리가 생존율을 **26배 향상**시킴
-
-<div align="center">
-<img src="./data/visual_print/myco_survival.png" width="70%" height="50%" alt="균근 처리별 생존율">
-</div>
 
 **🏔️ 토양 타입별 생존율**
 - 토양 0: 19.1%, 토양 1: 18.4%, **토양 2: 20.2%** (최고)
@@ -228,20 +324,44 @@
 - **EMF 높음(>20)**: 370/875 (42.3%)
 - **📈 핵심 발견**: EMF가 AMF보다 **3배 효과적**
 
+<div align="center">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/06_show_survival_ratio.png" 
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           alt="균근 처리별 생존율">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>균근 처리별 생존율</em>
+    </td>
+  </tr>
+</table>
+</div>
+
 **⏰ 시간대별 생존 패턴**
 - 초기~중기(~90일): 0% (모두 사망 상태)
 - **장기(90일~)**: 491/494 (99.4%)
 - 📊 **인사이트**: 90일 이후 관찰된 나무들은 대부분 생존
 
 <div align="center">
-<img src="./data/visual_print/05_show_alive_about_time.png" width="80%" height="60%" alt="시간별 생존율 추이">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/visual_print/05_show_alive_about_time.png" 
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           alt="시간별 생존율 추이">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>시간별 생존율 추이</em>
+    </td>
+  </tr>
+</table>
 </div>
-
-**🧪 화학 성분 영향 분석**
-- **Phenolics 고농도**: 34.0% vs 저농도 1.3%
-- **Lignin 고농도**: 33.9% vs 저농도 1.5%  
-- **NSC 고농도**: 31.5% vs 저농도 3.8%
-- **📈 핵심 발견**: 모든 화학 성분에서 고농도가 생존율 크게 향상
 
 #### **5️⃣ 데이터 정제 및 전처리**
 
@@ -301,8 +421,8 @@
 
 #### **💰 경제적 효과**
 - 기존 생존율 1.4% → **개선 후 45.3%** (32배 향상)
-- 재식재 비용 **95% 절감** 가능
-- 도시 녹지 조성 성공률 대폭 향상
+- 균근 처리를 통한 대폭적인 생존율 향상으로 재조림 비용 절감 효과 기대
+- 정확한 경제적 효과는 추가적인 비용-편익 분석 필요
 
 #### **🌱 지속가능한 도시 생태계 구축**
 - 데이터 기반 과학적 식재로 **건강한 쉼터 공간** 제공
