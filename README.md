@@ -143,10 +143,13 @@
 #### **2️⃣ DataPreprocessing 클래스** - 데이터 전처리 
 ```python
 # 전처리 파이프라인
+├── set_drop_cols()          # 드랍할 컬럼을 설정
 ├── call_raw_data()          # 원본 데이터 로드
+├── call_full_data()         # 전처리된 데이터 로드
 ├── drop_data()              # 불필요한 컬럼 제거
 ├── fill_na()                # 결측치 처리 (Harvest, Alive, EMF)
 ├── category_encoding()      # 범주형 데이터 인코딩 (Label/OneHot)
+├── category_decoding()      # 범주형 데이터 디코딩 (Label/OneHot)
 ├── set_date()               # 날짜 형식 통일
 ├── merge_label()            # Event, Harvest, Alive → 통합 라벨링
 └── run()                    # 전체 전처리 파이프라인 실행
