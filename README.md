@@ -220,12 +220,12 @@
   <tr>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/01_show_box_plot_for_continuous_value.png" 
-           style="max-width: 100%; height: 500px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
            alt="연속형 변수 특성별 값 분포">
     </td>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/02_show_anomaly_score.png" 
-           style="max-width: 100%; max-height: 450px; width: auto; height: auto;"
+           style="max-width: 100%; max-height: 350px; width: auto; height: auto;"
            alt="Isolation Forest Decision Function Score 이상치 탐색">
     </td>
   </tr>
