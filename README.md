@@ -220,12 +220,12 @@
   <tr>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/01_show_box_plot_for_continuous_value.png" 
-           style="max-width: 100%; height: 500px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="연속형 변수 특성별 값 분포">
     </td>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/02_show_anomaly_score.png" 
-           style="max-width: 100%; max-height: 450px; width: auto; height: auto;"
+           style="max-width: 100%; max-height: 300px; width: auto; height: auto;"
            alt="Isolation Forest Decision Function Score 이상치 탐색">
     </td>
   </tr>
@@ -239,6 +239,8 @@
   </tr>
 </table>
 </div>
+
+https://github.com/SKNetworks-AI19-250818/SKN19-mini-3Team/blob/7592da347bb285f3725bebd13f3336cca71ebe6a/main.ipynb
 
 #### **4️⃣ 데이터 시각화를 통한 탐색**
 <div align="center">
@@ -270,12 +272,12 @@
   <tr>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/04_show_chemical_relation_scatter_01.png" 
-           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="Lignin vs Phenolics 상관관계">
     </td>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/04_show_chemical_relation_scatter_02.png" 
-           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="NSC vs Phenolics 상관관계">
     </td>
   </tr>
@@ -290,12 +292,12 @@
   <tr>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/04_show_chemical_relation_scatter_03.png" 
-           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="Lignin vs NSC 상관관계">
     </td>
     <td align="center" width="50%" style="vertical-align: top; padding: 10px;">
       <img src="./data/visual_print/07_show_chemical_histogram.png" 
-           style="max-width: 100%; height: 450px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: 300px; width: auto; object-fit: contain;"
            alt="Phenolics 농도 분포">
     </td>
   </tr>
@@ -311,18 +313,18 @@
 </div>
 
 **🍄 균근 처리 효과 분석**
-- **균근 미처리**: 21/1,500 (1.4%)
-- **균근 처리**: 470/1,283 (36.6%)
-- **📈 핵심 발견**: 균근 처리가 생존율을 **26배 향상**시킴
+- **균근 미처리**: 210/1,500 (14.0%)
+- **균근 처리**: 494/1,283 (38.5%)
+- **📈 핵심 발견**: 균근 처리가 생존율을 **2.75배 향상**시킴
 
 **🏔️ 토양 타입별 생존율**
-- 토양 0: 19.1%, 토양 1: 18.4%, **토양 2: 20.2%** (최고)
-- 토양 3: 17.4%, 토양 4: 17.7%, 토양 5: 16.4%, 토양 6: 14.2%
+- 토양 0: 21.8%, 토양 1: 24.1%, 토양 2: 22.3%
+- 토양 3: 23.8%, **토양 4: 34.3%** (최고), 토양 5: 26.4%, 토양 6: 23.6%
 
 **🔬 균근균 타입별 효과**
-- **AMF 높음(>20)**: 164/1,112 (14.7%)
-- **EMF 높음(>20)**: 370/875 (42.3%)
-- **📈 핵심 발견**: EMF가 AMF보다 **3배 효과적**
+- **AMF 높음(>20)**: 228/1,112 (20.5%)
+- **EMF 높음(>20)**: 268/875 (30.6%)
+- **📈 핵심 발견**: EMF가 AMF보다 **1.5배 효과적**
 
 <div align="center">
 <table>
@@ -395,38 +397,38 @@
 
 ### 💡 **주요 발견 사항**
 
-1. **🍄 균근 처리의 압도적 효과**
-   - 균근 처리 시 생존율 **1.4% → 36.6%** (26배 향상)
-   - EMF 균근균이 AMF보다 3배 효과적 (42.3% vs 14.7%)
+1. **🍄 균근 처리의 유의미한 효과**
+   - 균근 처리 시 생존율 **14.0% → 38.5%** (2.8배 향상)
+   - EMF 균근균이 AMF보다 1.5배 효과적 (30.6% vs 20.5%)
 
 2. **🏔️ 토양의 중요성**
-   - 토양 타입 2에서 가장 높은 생존율 (20.2%)
-   - 균근 처리 + 토양 타입 2 조합 시 **45.3%** 달성
+   - 토양 타입 4에서 가장 높은 생존율 (34.3%)
+   - 균근 처리 + 토양 타입 4 조합 시 **34.4%** 달성
 
 3. **🧪 화학 성분의 결정적 역할**
-   - 고농도 화학 성분(Phenolics, Lignin, NSC)에서 생존율 **20배 이상** 향상
-   - 식물 내 방어 화합물과 에너지 저장 물질이 생존에 핵심
+   - Phenolics 고농도: 37.3% vs 저농도 17.6% (2.1배 향상)
+   - 식물 내 방어 화합물이 생존에 핵심적 역할
 
-4. **⏰ 시간의 선별 효과**
-   - 90일 이후까지 생존한 나무들은 99.4% 장기 생존
-   - 초기 90일이 생존의 **Critical Period**
+4. **⏰ 실험 설계의 특성**
+   - 90일 이상: 실험 목적상 의도적 수확으로 실험 종료
+   - 초기 90일이 생존 결정의 **Critical Period**
 
 ### 🏢 **도시 수목원 조성 전략**
 
 #### **📋 최적 식재 가이드라인**
-1. **필수 조건**: 균근 처리 (생존율 26배 향상)
-2. **토양 선택**: 토양 타입 2 우선 사용
-3. **균근균**: EMF(외생균근균) 접종 우선
+1. **필수 조건**: 균근 처리 (생존율 2.8배 향상)
+2. **토양 선택**: 토양 타입 4 우선 사용 (최고 생존율 34.3%)
+3. **균근균**: EMF(외생균근균) 접종 우선 (AMF보다 1.5배 효과적)
 4. **관리 집중**: 식재 후 90일간 집중 관리
 
 #### **💰 경제적 효과**
-- 기존 생존율 1.4% → **개선 후 45.3%** (32배 향상)
+- 기존 생존율 14.0% → 개선 후 **34.4%** (2.5배 향상)
 - 균근 처리를 통한 대폭적인 생존율 향상으로 재조림 비용 절감 효과 기대
 - 정확한 경제적 효과는 추가적인 비용-편익 분석 필요
 
 #### **🌱 지속가능한 도시 생태계 구축**
 - 데이터 기반 과학적 식재로 **건강한 쉼터 공간** 제공
-- 기후변화 대응을 위한 **효과적인 녹지 네트워크** 구축
+- 초기 90일 집중 관리를 통한 **효율적 자원 배분**
 - 시민 삶의 질 향상과 **환경 개선 동시 달성**
 
 ---
