@@ -156,7 +156,20 @@ class DataModify () :
         test_set_scaled = [X_test_scaled, test_set[1]]
 
         return train_set_scaled, test_set_scaled   # 값의 종류가 15개가 넘는, continuous 하고 숫자를 가지는 값들만 scaled
+
+    @staticmethod
+    def train_test_split_ignore_censored(alive_data, censored_data) :
+        train_set, test_set = DataModify.split_feature_label(alive_data)
+        dead_censored, alive_censored = DataModify.split_feature_label(censored_data, test_size=0.236)
+
+        alive_censored[1][:] = 2
+        dead_censored[1][:] = 0
         
+        train_set[0] = pd.concat([train_set[0], alive_censored[0], dead_censored[0]], axis=0)
+        train_set[1] = pd.concat([train_set[1], alive_censored[1], dead_censored[1]])
+
+        return train_set, test_set
+
 
 ### 데이터 전처리 클래스 선언
 
