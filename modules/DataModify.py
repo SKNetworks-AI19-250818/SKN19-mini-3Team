@@ -123,13 +123,12 @@ def train_test_split_ignore_censored(alive_data, censored_data, test_size=0.236)
 
 def split_data_X_y_e(df, test_size=.2, random_state=None) :
 
-    y = df[['Time', 'Alive']]
+    y = df[['Time', 'Alive']].copy()
     X = df.drop(columns=['Time', 'Alive'])
 
-    y.loc[y['Alive'] == 1, 'Alive'] = 0
-    y.loc[y['Alive'] != 1, 'Alive'] = 1
+    y['Alive'] = np.where(y['Alive'] != 0, 0, 1)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y['Alive'])
 
     e_train = y_train['Alive'].copy()
     y_train = y_train['Time'].copy()

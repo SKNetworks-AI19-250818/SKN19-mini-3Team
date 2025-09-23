@@ -12,7 +12,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import IsolationForest        # 이상치 판별을 위한 Isolation Forest 모델
 
-import DataModify
+import modules.DataModify as DataModify
 
 ### 데이터 체크 클래스 선언
 
