@@ -1,0 +1,47 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+import xgboost as xgb
+from lifelines.utils import concordance_index
+
+class TreeXGBoostCox :
+    def __init__(self, eta=0.1, max_depth=3, subsample=1.0, colsample_bytree=1.0,
+                 min_child_weight=1, reg_lambda=1.0, reg_alpha=0.0, tree_method="auto",
+                 num_boost_round=100, eval_metric="cox-nloglik"):
+        
+        self.params = {
+            "objective": "survival:cox",
+            "eval_metric": eval_metric,
+            "eta": eta,
+            "max_depth": max_depth,
+            "subsample": subsample,
+            "colsample_bytree": colsample_bytree,
+            "min_child_weight": min_child_weight,
+            "lambda": reg_lambda,   # L2 정규화
+            "alpha": reg_alpha,     # L1 정규화
+            "tree_method": tree_method
+        }
+        self.num_boost_round = num_boost_round
+        self.model = None
+        self.is_fitted = False
+
+    def fit(self, X, y, e) :
+        dtrain = xgb.DMatrix(X, label=y, weight=e)
+        self.model = xgb.train(self.params, dtrain, num_boost_round=self.num_boost_round)
+        self.is_fitted = True
+
+    def predict(self, X) :
+        if not self.is_fitted :
+            raise RuntimeError("Model must be fitted before prediction. Please run fit() first.")
+        
+        dmatrix = xgb.DMatrix(X)
+        scores = self.model.predict(dmatrix)
+        return scores
+    
+    def score(self, X, y, e) :
+        scores = self.predict(X)
+        return concordance_index(y, -scores, e)
+    
+
