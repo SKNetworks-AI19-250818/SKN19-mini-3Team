@@ -30,7 +30,7 @@ class TreeXGBoostCox :
         self.baseline_survival = None
 
     def S0(self, t):
-            return float(self.baseline_survival.loc[self.baseline_survival.index <= t].iloc[-1])
+            return float(self.baseline_survival.loc[self.baseline_survival.index <= t].iloc[-1, 0])
 
     def fit(self, X, y, e) :
         dtrain = xgb.DMatrix(X, label=y, weight=e)
@@ -51,14 +51,36 @@ class TreeXGBoostCox :
         
         dmatrix = xgb.DMatrix(X)
         scores = self.model.predict(dmatrix)
+        scores = (scores - scores.mean()) / scores.std()
 
         surv = {}
         for t in np.atleast_1d(times):
-            surv[t] = np.exp(-self.S0(t) * np.exp(scores))  # Cox 식: S(t|x) = S0(t)^exp(score)
+            surv[t] = self.S0(t) ** np.exp(scores)  # Cox 식: S(t|x) = S0(t)^exp(score)
         return surv
     
-    def score(self, X, y, e) :
-        scores = self.predict(X)
-        return concordance_index(y, -scores, e)
+    def score(self, X_test, time_test, event_test, t=115.5, threshold=0.5, show_comparison=False):
+
+        # 생존율 예측
+        surv_dict = self.predict(X_test, times=t)
+        surv_probs = surv_dict[t]
+
+        # threshold로 0/1 변환 (생존=1, 사망=0)
+        pred_labels = (surv_probs >= threshold).astype(int)
+
+        # 실제 레이블: 1=생존, 0=사망
+        true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
+
+        # 정확도 계산
+        accuracy = (pred_labels == true_labels).mean()
+
+        comparison = pd.DataFrame({
+            'Predicted': pred_labels,
+            'Actual': true_labels,
+            'Survival_Prob': surv_probs
+        })
+        if show_comparison is True :
+            print(comparison[['Predicted', 'Actual']].value_counts())
+
+        return accuracy
     
 
