@@ -1,10 +1,10 @@
 import numpy as np
 
 def calculate_metrics(confusion):
-    TP = confusion.get('TP', 0)
-    TN = confusion.get('TN', 0)
-    FP = confusion.get('FP', 0)
-    FN = confusion.get('FN', 0)
+    TP = confusion[1, 1]
+    TN = confusion[0, 0]
+    FP = confusion[0, 1]
+    FN = confusion[1, 0]
 
     # 정확도
     accuracy = (TP + TN) / (TP + TN + FP + FN) if (TP + TN + FP + FN) > 0 else 0

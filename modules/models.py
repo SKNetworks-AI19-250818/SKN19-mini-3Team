@@ -15,6 +15,7 @@ class TreeXGBoostCox(BaseEstimator) :
                  min_child_weight=1, reg_lambda=1.0, reg_alpha=0.0, tree_method="auto",
                  num_boost_round=100, eval_metric="cox-nloglik"):
         
+        # XGBoost Hyper Parameter
         self.eta = eta
         self.max_depth = max_depth
         self.subsample = subsample
@@ -26,7 +27,6 @@ class TreeXGBoostCox(BaseEstimator) :
         self.num_boost_round = num_boost_round
         self.eval_metric = eval_metric
 
-        # 내부 모델 상태
         self.model = None
         self.is_fitted = False
         self.baseline_survival = None
@@ -45,9 +45,11 @@ class TreeXGBoostCox(BaseEstimator) :
             "tree_method": self.tree_method
         }
 
+    # 생존함수 : 시간 t에서의 생존 확률을 반환하는 함수
     def S0(self, t):
             return float(self.baseline_survival.loc[self.baseline_survival.index <= t].iloc[-1, 0])
 
+    # 모델 학습
     def fit(self, X, y, e) :
         dtrain = xgb.DMatrix(X, label=y, weight=e)
         self.model = xgb.train(self.params, dtrain, num_boost_round=self.num_boost_round)
@@ -60,7 +62,8 @@ class TreeXGBoostCox(BaseEstimator) :
         cph.fit(df, duration_col='Time', event_col='Event')
         self.baseline_survival = cph.baseline_survival_
 
-    def predict(self, X, times) :
+    # 모델 예측 : 위험 점수로 출력된 값을 생존함수를 통해 생존확률을 계산
+    def predict(self, X, t) :
         if not self.is_fitted :
             raise RuntimeError("Model must be fitted before prediction. Please run fit() first.")
         
@@ -69,20 +72,19 @@ class TreeXGBoostCox(BaseEstimator) :
         scores = (scores - scores.mean()) / scores.std()
 
         surv = {}
-        for t in np.atleast_1d(times):
+        for t in np.atleast_1d(t):
             surv[t] = self.S0(t) ** np.exp(scores)  # Cox 식: S(t|x) = S0(t)^exp(score)
         return surv
     
+    # 모델 평가 : 생존확률을 통해 이진분류, 정확도를 평가
     def score(self, X_test, time_test, event_test, t=115.5, threshold=0.5, show_comparison=False):
 
         # 생존율 예측
-        surv_dict = self.predict(X_test, times=t)
+        surv_dict = self.predict(X_test, t=t)
         surv_probs = surv_dict[t]
 
-        # threshold로 0/1 변환 (생존=1, 사망=0)
         pred_labels = (surv_probs >= threshold).astype(int)
 
-        # 실제 레이블: 1=생존, 0=사망
         true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
 
         # 정확도 계산
@@ -98,8 +100,9 @@ class TreeXGBoostCox(BaseEstimator) :
 
         return accuracy
     
+    # 잘못 예측한 데이터를 분석용 데이터프레임으로 반환
     def create_mismatch_df(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
-        surv_dict = self.predict(X_test, times=t)
+        surv_dict = self.predict(X_test, t=t)
         surv_probs = surv_dict[t]  # np.array 형태
 
         pred_labels = (surv_probs >= threshold).astype(int)
@@ -118,10 +121,11 @@ class TreeXGBoostCox(BaseEstimator) :
 
         return mismatch_df
     
+    # confusion matrix 반환
     def confusion_matrix(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
         # label : 0 - 사망, 1 - 생존
 
-        surv_dict = self.predict(X_test, times=t)
+        surv_dict = self.predict(X_test, t=t)
         surv_probs = surv_dict[t]
 
         pred_labels = (surv_probs >= threshold).astype(int)
@@ -133,12 +137,7 @@ class TreeXGBoostCox(BaseEstimator) :
         fp = np.sum((pred_labels == 0) & (true_labels == 1))
         fn = np.sum((pred_labels == 1) & (true_labels == 0))
 
-        confusion = {
-            'TP': int(tp),
-            'TN': int(tn),
-            'FP': int(fp),
-            'FN': int(fn)
-        }
+        confusion = np.array([[tn, fp],[fn, tp]])
 
         return confusion
 
@@ -157,10 +156,10 @@ class TreeRandomForestCox(BaseEstimator):
         self.min_samples_leaf = min_samples_leaf
         self.random_state = random_state
 
-        # 내부 상태
         self.model = None
         self.is_fitted = False
 
+    # 모델 학습
     def fit(self, X, y, e):
 
         # sksurv는 structured array 필요
@@ -179,7 +178,8 @@ class TreeRandomForestCox(BaseEstimator):
         self.is_fitted = True
         return self
 
-    def predict(self, X, times):
+    # 모델 예측 : 위험 점수로 출력된 값을 생존함수를 통해 생존확률을 계산
+    def predict(self, X, t):
 
         if not self.is_fitted:
             raise RuntimeError("Model must be fitted before prediction.")
@@ -187,20 +187,19 @@ class TreeRandomForestCox(BaseEstimator):
         surv_funcs = self.model.predict_survival_function(X)
 
         surv = {}
-        for t in np.atleast_1d(times):
+        for t in np.atleast_1d(t):
             surv[t] = np.array([fn(t) for fn in surv_funcs])  # 각 샘플별 생존확률
         return surv
 
+    # 모델 평가 : 생존확률을 통해 이진분류, 정확도를 평가
     def score(self, X_test, time_test, event_test, t=115.5, threshold=0.5, show_comparison=False):
 
         # 생존율 예측
-        surv_dict = self.predict(X_test, times=t)
+        surv_dict = self.predict(X_test, t=t)
         surv_probs = surv_dict[t]
 
-        # threshold로 0/1 변환 (생존=1, 사망=0)
         pred_labels = (surv_probs >= threshold).astype(int)
 
-        # 실제 레이블: 1=생존, 0=사망
         true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
 
         # 정확도 계산
@@ -216,8 +215,9 @@ class TreeRandomForestCox(BaseEstimator):
 
         return accuracy
     
+    # 잘못 예측한 데이터를 분석용 데이터프레임으로 반환
     def create_mismatch_df(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
-        surv_dict = self.predict(X_test, times=t)
+        surv_dict = self.predict(X_test, t=t)
         surv_probs = surv_dict[t]  # np.array 형태
 
         pred_labels = (surv_probs >= threshold).astype(int)
@@ -236,10 +236,11 @@ class TreeRandomForestCox(BaseEstimator):
 
         return mismatch_df
     
+    # confusion matrix 반환
     def confusion_matrix(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
         # label : 0 - 사망, 1 - 생존
 
-        surv_dict = self.predict(X_test, times=t)
+        surv_dict = self.predict(X_test, t=t)
         surv_probs = surv_dict[t]
 
         pred_labels = (surv_probs >= threshold).astype(int)
@@ -251,11 +252,5 @@ class TreeRandomForestCox(BaseEstimator):
         fp = np.sum((pred_labels == 0) & (true_labels == 1))
         fn = np.sum((pred_labels == 1) & (true_labels == 0))
 
-        confusion = {
-            'TP': int(tp),
-            'TN': int(tn),
-            'FP': int(fp),
-            'FN': int(fn)
-        }
-
+        confusion = np.array([[tn, fp],[fn, tp]])
         return confusion
