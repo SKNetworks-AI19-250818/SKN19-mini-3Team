@@ -3,31 +3,45 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from sklearn.base import BaseEstimator
 import xgboost as xgb
 from lifelines.utils import concordance_index
 from lifelines import CoxPHFitter
 
-class TreeXGBoostCox :
+class TreeXGBoostCox(BaseEstimator) :
     def __init__(self, eta=0.1, max_depth=3, subsample=1.0, colsample_bytree=1.0,
                  min_child_weight=1, reg_lambda=1.0, reg_alpha=0.0, tree_method="auto",
                  num_boost_round=100, eval_metric="cox-nloglik"):
         
-        self.params = {
-            "objective": "survival:cox",
-            "eval_metric": eval_metric,
-            "eta": eta,
-            "max_depth": max_depth,
-            "subsample": subsample,
-            "colsample_bytree": colsample_bytree,
-            "min_child_weight": min_child_weight,
-            "lambda": reg_lambda,   # L2 정규화
-            "alpha": reg_alpha,     # L1 정규화
-            "tree_method": tree_method
-        }
+        self.eta = eta
+        self.max_depth = max_depth
+        self.subsample = subsample
+        self.colsample_bytree = colsample_bytree
+        self.min_child_weight = min_child_weight
+        self.reg_lambda = reg_lambda
+        self.reg_alpha = reg_alpha
+        self.tree_method = tree_method
         self.num_boost_round = num_boost_round
+        self.eval_metric = eval_metric
+
+        # 내부 모델 상태
         self.model = None
         self.is_fitted = False
         self.baseline_survival = None
+
+        # XGBoost params dict
+        self.params = {
+            "objective": "survival:cox",
+            "eval_metric": self.eval_metric,
+            "eta": self.eta,
+            "max_depth": self.max_depth,
+            "subsample": self.subsample,
+            "colsample_bytree": self.colsample_bytree,
+            "min_child_weight": self.min_child_weight,
+            "lambda": self.reg_lambda,   # L2 정규화
+            "alpha": self.reg_alpha,     # L1 정규화
+            "tree_method": self.tree_method
+        }
 
     def S0(self, t):
             return float(self.baseline_survival.loc[self.baseline_survival.index <= t].iloc[-1, 0])
@@ -43,7 +57,6 @@ class TreeXGBoostCox :
         cph = CoxPHFitter()
         cph.fit(df, duration_col='Time', event_col='Event')
         self.baseline_survival = cph.baseline_survival_
-
 
     def predict(self, X, times) :
         if not self.is_fitted :
@@ -83,4 +96,51 @@ class TreeXGBoostCox :
 
         return accuracy
     
+    def create_mismatch_df(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
+        # 1️⃣ predict() 호출 → t 시점 생존확률
+        surv_dict = self.predict(X_test, times=t)
+        surv_probs = surv_dict[t]  # np.array 형태
 
+        # 2️⃣ threshold 적용 → 예측 라벨
+        pred_labels = (surv_probs >= threshold).astype(int)
+
+        # 3️⃣ 실제 라벨 t 시점 기준
+        true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
+
+        # 4️⃣ 비교 DataFrame 생성
+        comparison = pd.DataFrame({
+            'Predicted_Label': pred_labels,
+            'Actual_Label': true_labels,
+            'Predicted_Survival_Prob': np.round(surv_probs, 2),
+            'Time': time_test,
+            'Event': event_test
+        })
+
+        # 5️⃣ 예측과 실제 다른 경우만 필터링
+        mismatch_df = comparison[comparison['Predicted_Label'] != comparison['Actual_Label']]
+
+        return mismatch_df
+    
+    def confusion_matrix(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
+        # label : 0 - 사망, 1 - 생존
+
+        surv_dict = self.predict(X_test, times=t)
+        surv_probs = surv_dict[t]
+
+        pred_labels = (surv_probs >= threshold).astype(int)
+
+        true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
+
+        tp = np.sum((pred_labels == 0) & (true_labels == 0))
+        tn = np.sum((pred_labels == 1) & (true_labels == 1))
+        fp = np.sum((pred_labels == 0) & (true_labels == 1))
+        fn = np.sum((pred_labels == 1) & (true_labels == 0))
+
+        confusion = {
+            'TP': int(tp),
+            'TN': int(tn),
+            'FP': int(fp),
+            'FN': int(fn)
+        }
+
+        return confusion
