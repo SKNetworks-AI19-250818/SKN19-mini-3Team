@@ -99,17 +99,13 @@ class TreeXGBoostCox(BaseEstimator) :
         return accuracy
     
     def create_mismatch_df(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
-        # 1️⃣ predict() 호출 → t 시점 생존확률
         surv_dict = self.predict(X_test, times=t)
         surv_probs = surv_dict[t]  # np.array 형태
 
-        # 2️⃣ threshold 적용 → 예측 라벨
         pred_labels = (surv_probs >= threshold).astype(int)
 
-        # 3️⃣ 실제 라벨 t 시점 기준
         true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
 
-        # 4️⃣ 비교 DataFrame 생성
         comparison = pd.DataFrame({
             'Predicted_Label': pred_labels,
             'Actual_Label': true_labels,
@@ -118,7 +114,6 @@ class TreeXGBoostCox(BaseEstimator) :
             'Event': event_test
         })
 
-        # 5️⃣ 예측과 실제 다른 경우만 필터링
         mismatch_df = comparison[comparison['Predicted_Label'] != comparison['Actual_Label']]
 
         return mismatch_df
@@ -222,17 +217,13 @@ class TreeRandomForestCox(BaseEstimator):
         return accuracy
     
     def create_mismatch_df(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
-        # 1️⃣ predict() 호출 → t 시점 생존확률
         surv_dict = self.predict(X_test, times=t)
         surv_probs = surv_dict[t]  # np.array 형태
 
-        # 2️⃣ threshold 적용 → 예측 라벨
         pred_labels = (surv_probs >= threshold).astype(int)
 
-        # 3️⃣ 실제 라벨 t 시점 기준
         true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
 
-        # 4️⃣ 비교 DataFrame 생성
         comparison = pd.DataFrame({
             'Predicted_Label': pred_labels,
             'Actual_Label': true_labels,
@@ -241,7 +232,6 @@ class TreeRandomForestCox(BaseEstimator):
             'Event': event_test
         })
 
-        # 5️⃣ 예측과 실제 다른 경우만 필터링
         mismatch_df = comparison[comparison['Predicted_Label'] != comparison['Actual_Label']]
 
         return mismatch_df
