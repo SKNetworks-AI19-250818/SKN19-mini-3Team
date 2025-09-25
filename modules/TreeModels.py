@@ -165,7 +165,7 @@ class TreeXGBoostCox(BaseEstimator) :
 
         return confusion
 
-class TreeRandomForestCox(BaseEstimator):
+class TreeRandomForestSurvival(BaseEstimator):
     def __init__(self, 
                  n_estimators=100,
                  max_depth=None,
