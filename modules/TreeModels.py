@@ -50,14 +50,26 @@ class TreeXGBoostCox(BaseEstimator) :
             return float(self.baseline_survival.loc[self.baseline_survival.index <= t].iloc[-1, 0])
 
     # 모델 학습
-    def fit(self, X, y, e) :
-        dtrain = xgb.DMatrix(X, label=y, weight=e)
+    def fit(self, X, y, e=None) :
+        if e is None:
+            if not isinstance(y, pd.DataFrame):
+                raise ValueError("e가 None일 때 y는 'Time'과 'Alive' 컬럼을 가진 DataFrame이어야 합니다.")
+            y_values = y['Time']
+            e_values = y['Alive']
+        else :
+            y_values = y
+            e_values = e
+
+        times = y_values
+        event = e_values
+
+        dtrain = xgb.DMatrix(X, label=times, weight=e)
         self.model = xgb.train(self.params, dtrain, num_boost_round=self.num_boost_round)
         self.is_fitted = True
 
         df = pd.DataFrame(X.copy())
-        df['Time'] = y
-        df['Event'] = e
+        df['Time'] = times
+        df['Event'] = event
         cph = CoxPHFitter()
         cph.fit(df, duration_col='Time', event_col='Event')
         self.baseline_survival = cph.baseline_survival_
@@ -77,7 +89,19 @@ class TreeXGBoostCox(BaseEstimator) :
         return surv
     
     # 모델 평가 : 생존확률을 통해 이진분류, 정확도를 평가
-    def score(self, X_test, time_test, event_test, t=115.5, threshold=0.5, show_comparison=False):
+    def score(self, X_test, time_test, event_test=None, t=115.5, threshold=0.5, show_comparison=False):
+        if event_test is None:
+            if not isinstance(time_test, pd.DataFrame):
+                raise ValueError("e가 None일 때 y는 'Time'과 'Alive' 컬럼을 가진 DataFrame이어야 합니다.")
+            y_values = time_test['Time']
+            e_values = time_test['Alive']
+        else : 
+            y_values = time_test
+            e_values = event_test
+
+            
+        times = y_values
+        event = e_values
 
         # 생존율 예측
         surv_dict = self.predict(X_test, t=t)
@@ -85,7 +109,7 @@ class TreeXGBoostCox(BaseEstimator) :
 
         pred_labels = (surv_probs >= threshold).astype(int)
 
-        true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
+        true_labels = np.where((times > t) | ((times <= t) & (event == 0)), 1, 0)
 
         # 정확도 계산
         accuracy = (pred_labels == true_labels).mean()
@@ -160,10 +184,21 @@ class TreeRandomForestCox(BaseEstimator):
         self.is_fitted = False
 
     # 모델 학습
-    def fit(self, X, y, e):
+    def fit(self, X, y, e=None):
+        if e is None:
+            if not isinstance(y, pd.DataFrame):
+                raise ValueError("e가 None일 때 y는 'Time'과 'Alive' 컬럼을 가진 DataFrame이어야 합니다.")
+            y_values = y['Time']
+            e_values = y['Alive']
+        else :
+            y_values = y
+            e_values = e
+
+        times = y_values
+        event = e_values
 
         # sksurv는 structured array 필요
-        y_struct = Surv.from_arrays(event=e.astype(bool), time=y)
+        y_struct = Surv.from_arrays(event=event.astype(bool), time=times)
 
         self.model = RandomSurvivalForest(
             n_estimators=self.n_estimators,
@@ -192,7 +227,21 @@ class TreeRandomForestCox(BaseEstimator):
         return surv
 
     # 모델 평가 : 생존확률을 통해 이진분류, 정확도를 평가
-    def score(self, X_test, time_test, event_test, t=115.5, threshold=0.5, show_comparison=False):
+    def score(self, X_test, time_test, event_test=None, t=115.5, threshold=0.5, show_comparison=False):
+
+        if event_test is None:
+            if not isinstance(time_test, pd.DataFrame):
+                raise ValueError("e가 None일 때 y는 'Time'과 'Alive' 컬럼을 가진 DataFrame이어야 합니다.")
+            y_values = time_test['Time']
+            e_values = time_test['Alive']
+
+        else : 
+            y_values = time_test
+            e_values = event_test
+
+            
+        times = y_values
+        event = e_values
 
         # 생존율 예측
         surv_dict = self.predict(X_test, t=t)
@@ -200,7 +249,7 @@ class TreeRandomForestCox(BaseEstimator):
 
         pred_labels = (surv_probs >= threshold).astype(int)
 
-        true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
+        true_labels = np.where((times > t) | ((times <= t) & (event == 0)), 1, 0)
 
         # 정확도 계산
         accuracy = (pred_labels == true_labels).mean()

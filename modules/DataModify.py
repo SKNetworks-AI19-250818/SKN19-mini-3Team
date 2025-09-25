@@ -108,10 +108,12 @@ def scale_data(train_set, test_set) :
 # 검열값을 최종 생존율에 따라 랜덤으로 예측한 데이터를 split
 
 def train_test_split_ignore_censored(alive_data, censored_data, test_size=0.236) :
+    alive_data.loc[alive_data['Alive'] == 2, 'Alive'] = 1
+
     train_set, test_set = split_feature_label(alive_data)
     dead_censored, alive_censored = split_feature_label(censored_data, test_size=test_size)
 
-    alive_censored[1][:] = 2
+    alive_censored[1][:] = 1
     dead_censored[1][:] = 0
     
     train_set[0] = pd.concat([train_set[0], alive_censored[0], dead_censored[0]], axis=0)

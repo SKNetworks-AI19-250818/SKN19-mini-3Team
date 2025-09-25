@@ -115,6 +115,7 @@ class DataPreprocessing () :
         # categorical한 데이터 = 데이터가 가지는 서로 다른 값이 15개 미만
 
         categorical_col = DataCheck.return_cols(self.df, 'categorical')       # Categorical한 column의 컬럼명을 선택
+        categorical_col.remove("Alive")
 
         df_encoded = self.df.copy() # 인코딩할 데이터
 
@@ -216,6 +217,7 @@ class DataPreprocessing () :
         
         if encoding is not None :       # 데이터를 인코딩
             self.df = self.category_encoding(encoding)
+
 
         if return_anomaly is True :
             return self.df, df_anomaly
