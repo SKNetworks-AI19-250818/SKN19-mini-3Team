@@ -172,13 +172,15 @@ class TreeRandomForestSurvival(BaseEstimator):
                  max_features="sqrt",
                  min_samples_split=2,
                  min_samples_leaf=1,
-                 random_state=None):
+                 random_state=None,
+                 threshold=0.5):   # 생존 확률 기준값 기본 설정
         self.n_estimators = n_estimators
         self.max_depth = max_depth
         self.max_features = max_features
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.random_state = random_state
+        self.threshold = threshold  # 저장
 
         self.model = None
         self.is_fitted = False
@@ -194,12 +196,10 @@ class TreeRandomForestSurvival(BaseEstimator):
             y_values = y
             e_values = e
 
-        times = y_values
-        event = e_values
-
         # sksurv는 structured array 필요
-        y_struct = Surv.from_arrays(event=event.astype(bool), time=times)
+        y_struct = Surv.from_arrays(event=e_values.astype(bool), time=y_values)
 
+        # RandomSurvivalForest 모델 생성 및 학습
         self.model = RandomSurvivalForest(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
@@ -213,64 +213,63 @@ class TreeRandomForestSurvival(BaseEstimator):
         self.is_fitted = True
         return self
 
-    # 모델 예측 : 위험 점수로 출력된 값을 생존함수를 통해 생존확률을 계산
+    # 모델 예측 : 위험 점수로 출력된 값을 생존함수를 통해 생존확률 계산
     def predict(self, X, t):
-
         if not self.is_fitted:
             raise RuntimeError("Model must be fitted before prediction.")
 
         surv_funcs = self.model.predict_survival_function(X)
-
         surv = {}
         for t in np.atleast_1d(t):
             surv[t] = np.array([fn(t) for fn in surv_funcs])  # 각 샘플별 생존확률
         return surv
 
-    # 모델 평가 : 생존확률을 통해 이진분류, 정확도를 평가
-    def score(self, X_test, time_test, event_test=None, t=115.5, threshold=0.5, show_comparison=False):
+    # 모델 평가 : 생존확률을 통해 이진분류, 정확도 계산
+    def score(self, X_test, time_test, event_test=None, t=115.5, threshold=None, show_comparison=False):
+        if threshold is None:
+            threshold = self.threshold  # 기본값 사용
 
         if event_test is None:
             if not isinstance(time_test, pd.DataFrame):
                 raise ValueError("e가 None일 때 y는 'Time'과 'Alive' 컬럼을 가진 DataFrame이어야 합니다.")
             y_values = time_test['Time']
             e_values = time_test['Alive']
-
         else : 
             y_values = time_test
             e_values = event_test
-
-            
-        times = y_values
-        event = e_values
 
         # 생존율 예측
         surv_dict = self.predict(X_test, t=t)
         surv_probs = surv_dict[t]
 
+        # threshold 기준으로 Alive(1) / Dead(0) 분류
         pred_labels = (surv_probs >= threshold).astype(int)
 
-        true_labels = np.where((times > t) | ((times <= t) & (event == 0)), 1, 0)
+        # 실제 라벨 생성
+        true_labels = np.where((y_values > t) | ((y_values <= t) & (e_values == 0)), 1, 0)
 
         # 정확도 계산
         accuracy = (pred_labels == true_labels).mean()
 
-        comparison = pd.DataFrame({
-            'Predicted': pred_labels,
-            'Actual': true_labels,
-            'Survival_Prob': surv_probs
-        })
-        if show_comparison is True :
-            print(comparison[['Predicted', 'Actual']].value_counts())
+        if show_comparison:
+            comparison = pd.DataFrame({
+                'Predicted': pred_labels,
+                'Actual': true_labels,
+                'Survival_Prob': surv_probs
+            })
+            print(comparison[['Predicted','Actual']].value_counts())
 
         return accuracy
-    
+
     # 잘못 예측한 데이터를 분석용 데이터프레임으로 반환
-    def create_mismatch_df(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
+    def create_mismatch_df(self, X_test, time_test, event_test, t=115.5, threshold=None):
+        if threshold is None:
+            threshold = self.threshold
+
         surv_dict = self.predict(X_test, t=t)
         surv_probs = surv_dict[t]  # np.array 형태
 
         pred_labels = (surv_probs >= threshold).astype(int)
-
         true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
 
         comparison = pd.DataFrame({
@@ -282,18 +281,17 @@ class TreeRandomForestSurvival(BaseEstimator):
         })
 
         mismatch_df = comparison[comparison['Predicted_Label'] != comparison['Actual_Label']]
-
         return mismatch_df
-    
+
     # confusion matrix 반환
-    def confusion_matrix(self, X_test, time_test, event_test, t=115.5, threshold=0.5):
-        # label : 0 - 사망, 1 - 생존
+    def confusion_matrix(self, X_test, time_test, event_test, t=115.5, threshold=None):
+        if threshold is None:
+            threshold = self.threshold
 
         surv_dict = self.predict(X_test, t=t)
         surv_probs = surv_dict[t]
 
         pred_labels = (surv_probs >= threshold).astype(int)
-
         true_labels = np.where((time_test > t) | ((time_test <= t) & (event_test == 0)), 1, 0)
 
         tp = np.sum((pred_labels == 0) & (true_labels == 0))
@@ -303,3 +301,66 @@ class TreeRandomForestSurvival(BaseEstimator):
 
         confusion = np.array([[tn, fp],[fn, tp]])
         return confusion
+
+    # 테스트 샘플 집단 기준 평균 생존확률 곡선
+    def plot_predicted_survival_curve(self, X_test, max_time=None):
+        if not self.is_fitted:
+            raise RuntimeError("Model must be fitted before prediction.")
+
+        surv_funcs = self.model.predict_survival_function(X_test)
+        times = surv_funcs[0].x
+        surv_matrix = np.array([fn.y for fn in surv_funcs])  # (n_samples, n_times)
+
+        mean_surv = surv_matrix.mean(axis=0)  # 평균 생존확률 계산
+
+        plt.figure(figsize=(10,6))
+        plt.step(times, mean_surv, where="post", label="Predicted Survival (mean)", color="blue")
+        
+        if max_time:
+            plt.xlim(0, max_time)
+
+        plt.xlabel("Time")
+        plt.ylabel("Survival Probability")
+        plt.title("Predicted Survival Function (Mean over Test Samples)")
+        plt.grid(alpha=0.3)
+        plt.legend()
+        plt.show()
+
+    # 시간별 Alive/Dead 샘플 수 시각화
+    def plot_alive_dead_over_time(self, X_test, time_points, threshold=None):
+        if threshold is None:
+            threshold = self.threshold
+        if not self.is_fitted:
+            raise RuntimeError("Model must be fitted before prediction.")
+
+        alive_counts = pd.DataFrame({
+            'Time': [0],
+            'Alive': [len(X_test)],
+            'Dead': [0]
+        })
+
+        for t in time_points:
+            surv_dict = self.predict(X_test, t=t)
+            surv_probs = surv_dict[t]
+
+            # threshold 기준 Alive/Dead 분류
+            pred_labels = (surv_probs >= threshold).astype(int)
+            alive_count = (pred_labels == 1).sum()
+            dead_count = (pred_labels == 0).sum()
+
+            alive_counts = pd.concat(
+                [alive_counts, pd.DataFrame([[t, alive_count, dead_count]], columns=['Time','Alive','Dead'])],
+                ignore_index=True
+            )
+
+        # 시각화
+        plt.figure(figsize=(10,6))
+        plt.plot(alive_counts['Time'], alive_counts['Alive'], label="Alive", color="green")
+        plt.plot(alive_counts['Time'], alive_counts['Dead'], label="Dead", color="red")
+
+        plt.xlabel("Time")
+        plt.ylabel("Sample Count")
+        plt.title(f"Predicted Alive/Dead Counts Over Time (threshold={threshold})")
+        plt.legend()
+        plt.grid(alpha=0.3)
+        plt.show()
