@@ -67,7 +67,6 @@ def show_alive_about_time(df):
     plt.grid(alpha=0.3)
     plt.show()
 
-
 def compare_km_and_model(model, X_test, time_test, event_test, max_time=None):
     # 1. Kaplan-Meier 곡선 (실제)
     kmf = KaplanMeierFitter()
