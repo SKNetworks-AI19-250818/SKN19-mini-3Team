@@ -181,6 +181,39 @@ grid.fit(X_train, y_train)
 **[XGBoost 결과 시각화 위치]**
 > *모델 성능 지표, 특성 중요도, 학습 곡선 등*
 
+##### 3.1. 기본 XGBoost
+```python
+# XGB 모델 생성
+xgb_clf = XGBClassifier(
+    n_estimators=100,
+    max_depth=3,
+    learning_rate=0.1,
+    random_state=42, 
+    enable_categorical=True 
+)
+
+# 학습
+xgb_clf.fit(X_train, y_train)
+
+# 훈련모델 평가 출력
+train_model_evaluation(xgb_clf, X_train, y_train, X_test, y_test)
+
+# 평가지표 출력
+evaluate_binary_classification(y_test, y_pred)
+```
+```sh
+Training Score  : 0.8415046491969569
+Testing  Score  : 0.8173076923076923
+Cross Validation Score : 0.776831607211354
+======================================================================================================================================================
+Accuracy        : 0.8173076923076923
+Confusion Matrix:
+ [[286  27]
+ [ 49  54]]
+Precision       : 0.6666666666666666
+Recall          : 0.5242718446601942
+F1 Score        : 0.5869565217391305
+```
 **주요 결과:**
 - 정확도: [수치]
 - 정밀도: [수치]
@@ -305,3 +338,4 @@ grid.fit(X_train, y_train)
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
