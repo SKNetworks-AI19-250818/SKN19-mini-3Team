@@ -47,7 +47,11 @@ class TreeXGBoostCox(BaseEstimator) :
 
     # 생존함수 : 시간 t에서의 생존 확률을 반환하는 함수
     def S0(self, t):
-            return float(self.baseline_survival.loc[self.baseline_survival.index <= t].iloc[-1, 0])
+        subset = self.baseline_survival.loc[self.baseline_survival.index <= t]
+        if subset.empty:
+            # 가장 작은 값으로 fallback
+            return float(self.baseline_survival.iloc[0, 0])
+        return float(subset.iloc[-1, 0])
 
     # 모델 학습
     def fit(self, X, y, e=None) :
