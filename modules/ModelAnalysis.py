@@ -94,17 +94,29 @@ def compare_km_and_model(model, X_test, time_test, event_test, max_time=None):
     plt.grid(alpha=0.3)
     plt.show()
 
-def rsf_score_over_time(rsf, test_set, t_max, n_points=100):
+def rsf_score_over_time(rsf, test_set, t_max, n_points=100): 
 
     t_values = np.linspace(0, t_max, n_points)
-    scores = [rsf.score(*test_set, t=t)*100 for t in t_values]
 
+    # 각 지표별 값 저장
+    scores = []
+    for t in t_values:
+        s = calculate_metrics(rsf.confusion_matrix(*test_set, t=t))   # <-- 이 부분이 {'Accuracy':..., 'Precision':..., 'Recall':...} 반환
+        scores.append(s)
+
+    # 지표 목록
+    metrics = scores[0].keys()
+
+    # 그래프 그리기
     plt.figure(figsize=(8,5))
-    plt.plot(t_values, scores, color='blue', lw=2, label="Score over Time")
+    for metric in metrics:
+        values = [s[metric] for s in scores]
+        plt.plot(t_values, values, lw=2, label=metric)
+
     plt.xlabel("Time")
     plt.ylabel("Score")
-    plt.ylim(0, 100)
-    plt.title("RSF Score vs Time")
+    plt.ylim(0, 1)   # 비율형 지표이므로 0~1 범위
+    plt.title("RSF Multi-Score vs Time")
     plt.grid(True)
     plt.legend()
     plt.show()
