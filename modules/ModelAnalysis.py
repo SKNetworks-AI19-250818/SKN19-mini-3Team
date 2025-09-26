@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from lifelines import KaplanMeierFitter
+import seaborn as sns
 
 def calculate_metrics(confusion):
     TP = confusion[1, 1]
@@ -189,4 +190,14 @@ def compare_real_vs_pred_alive_dead(model, df_real, X_test, time_points, thresho
     plt.title("Real vs Predicted Alive/Dead Ratios Over Time")
     plt.legend()
     plt.grid(alpha=0.3)
+    plt.show()
+
+def show_confusion_matrix(cm) :
+    plt.figure(figsize=(6,5))
+    sns.heatmap(cm, annot=True, fmt="d", cmap='Greens',
+                xticklabels=np.array([0, 1]), 
+                yticklabels=np.array([0, 1]))
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
     plt.show()

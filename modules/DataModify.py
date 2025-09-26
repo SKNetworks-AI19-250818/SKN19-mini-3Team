@@ -80,7 +80,7 @@ def split_feature_label(df, test_size=.2) :
     X = df.drop(columns='Alive')
     y = df['Alive']
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
 
     return [X_train, y_train], [X_test, y_test]     # train set과 test set을 반환
 
