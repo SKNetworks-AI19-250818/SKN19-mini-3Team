@@ -80,6 +80,97 @@ EDA를 통해 분석한 데이터를 기반으로 데이터 전처리 및 인코
 **[Random Forest 결과 시각화 위치]**
 > *모델 성능 지표, 특성 중요도, 트리 구조 등*
 
+##### 2.1. 기본 랜덤포레스트
+```python
+# 랜덤포레스트 모델 생성
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# 학습
+rf.fit(X_train, y_train)
+
+# 훈련모델 평가 출력
+train_model_evaluation(rf, X_train, y_train, X_test, y_test)
+# 평가지표 출력
+evaluate_binary_classification(y_test, y_pred)
+```
+```sh
+Training Score  : 0.9602704987320372
+Testing  Score  : 0.8269230769230769
+Cross Validation Score : 0.7734400228365492
+===============================================================
+Accuracy        : 0.8269230769230769
+Confusion Matrix:
+ [[291  28]
+ [ 44  53]]
+Precision       : 0.654320987654321
+Recall          : 0.5463917525773195
+F1 Score        : 0.5955056179775281
+```
+##### 2.2. KFold 랜덤포레스트
+```python
+# KFold 교차 검증
+from sklearn.model_selection import KFold
+
+# 5개의 폴드로 나누고 랜덤하게 섞음
+kfold = KFold(n_splits=5, shuffle=True, random_state=42)
+```
+```sh
+Training Score  : 0.9294167371090448
+Testing  Score  : 0.7864693446088795
+Cross Validation Score : 0.7734400228365492
+===============================================================
+Accuracy        : 0.7864693446088795
+Confusion Matrix:
+ [[320  37]
+ [ 64  52]]
+Precision       : 0.5842696629213483
+Recall          : 0.4482758620689655
+F1 Score        : 0.5073170731707317
+```
+##### 2.3. StratifiedKFold 랜덤포레스트
+```python
+# StratifiedKFold 교차 검증
+from sklearn.model_selection import StratifiedKFold
+
+skfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+```
+```sh
+Training Score  : 0.9289940828402367
+Testing  Score  : 0.7949260042283298
+Cross Validation Score : 0.7734400228365492
+===============================================================
+Accuracy        : 0.7949260042283298
+Confusion Matrix:
+ [[323  38]
+ [ 59  53]]
+Precision       : 0.5824175824175825
+Recall          : 0.4732142857142857
+F1 Score        : 0.5221674876847291
+```
+##### 2.4. GridSearchCV 랜덤포레스트
+```python
+# GridSearchCV 사용
+from sklearn.model_selection import GridSearchCV
+
+# 하이퍼 파라미터 튜닝을 위한 그리드 탐색 범위 정의
+param_grid = {
+    'n_estimators': [100, 200, 300],  # 트리 개수
+    'max_depth': [None, 5, 10, 20],   # 트리 최대 깊이
+    'min_samples_split': [2, 5, 10],  # 내부 노드를 분할하는 데 필요한 최소 샘플 수
+    'min_samples_leaf': [1, 2, 4],    # 리프 노드가 되기 위한 최소 샘플 수
+    'max_features': ['auto', 'sqrt', 'log2']  # 각 분할에서 고려할 최대 특성 수
+}
+
+grid = GridSearchCV(rf, param_grid, scoring='accuracy', cv=5, n_jobs=-1)
+
+grid.fit(X_train, y_train)
+```
+```sh
+최적의 파라미터             : {'max_depth': None, 'max_features': 'sqrt', 'min_samples_leaf': 1, 'min_samples_split': 10, 'n_estimators': 100}
+최적의 파라미터로 학습된 모델: RandomForestClassifier(min_samples_split=10, random_state=42)
+최적화된 정확도 점수        : 0.7861241202130221
+```
+
 **주요 결과:**
 - 정확도: [수치]
 - 정밀도: [수치]
