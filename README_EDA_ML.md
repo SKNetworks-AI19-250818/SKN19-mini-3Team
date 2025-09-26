@@ -76,6 +76,84 @@ EDA를 통해 분석한 데이터를 기반으로 데이터 전처리 및 인코
 - 재현율: [수치]
 - F1-score: [수치]
 
+# 묘목 생존율 예측 모델 프로젝트
+
+## 프로젝트 개요
+본 프로젝트는 묘목의 생존율을 예측하기 위한 머신러닝 모델을 개발하는 프로젝트입니다.
+초기의 단순 분류 모델에서 시작하여, 시간에 따른 생존율을 예측할 수 있는 고도화된 생존 분석 모델까지 구현하였습니다.
+
+## 목차
+1. [EDA를 기반으로 한 데이터 전처리](#1-eda를-기반으로-한-데이터-전처리)
+2. [분류 모델을 이용한 묘목의 생존 여부 예측](#2-분류-모델을-이용한-묘목의-생존-여부-예측)
+3. [기존 모델의 한계 및 새로운 모델 기획](#3-기존-모델의-한계-및-새로운-모델-기획)
+4. [시간에 따른 생존율을 예측하는 모델 구현 및 평가](#4-시간에-따른-생존율을-예측하는-모델-구현-및-평가)
+5. [모델 평가 방식과 성능 고도화 기법](#5-모델-평가-방식과-성능-고도화-기법)
+6. [트러블 슈팅](#6-트러블-슈팅)
+
+---
+
+## 1. EDA를 기반으로 한 데이터 전처리
+
+### 데이터 개요
+EDA를 통해 분석한 데이터를 기반으로 데이터 전처리 및 인코딩을 수행하였습니다.
+
+### 주요 특성(Features) 및 라벨(Labels)
+
+| 변수명 | 설명 |
+|--------|------|
+| **Species** | 나무 종명 |
+| **Light_ISF** | 조도 (받는 햇빛의 양) |
+| **Light_Cat** | 빛의 세기 |
+| **Soil** | 토양의 출처 |
+| **Sterile** | 토양의 살균 여부 |
+| **Conspecific** | 토양의 타입 (동종에서 채취한 토양, 이종에서 채취한 토양,...) |
+| **Myco** | 나무에서 발견되는 균의 종류 |
+| **SoilMyco** | 토양에서 발견되는 균의 종류 |
+| **PlantDate** | 식재일 |
+| **AMF** | AMF균의 비율 |
+| **EMF** | EMF균의 비율 |
+| **Phenolics** | 페놀 화합물의 함유량 |
+| **Lignin** | 리그닌의 비율 |
+| **NSC** | NSC의 비율 |
+| **Time** | 사건(사망 혹은 측정 종료)가 발생한 시간 |
+| **Alive** | 사건 종류 (생존/사망) |
+
+### 전처리 과정
+다음과 같은 순서로 데이터 전처리를 진행하였습니다:
+
+```
+데이터 드랍 → 이상치 처리 → 결측치 처리 → 날짜값 통일 → 라벨 데이터 통합 → 인코딩
+```
+
+**[데이터 분포 시각화 자료 위치]**
+> *데이터의 분포, 결측치 현황, 이상치 탐지 결과 등의 시각화 자료*
+
+---
+
+## 2. 분류 모델을 이용한 묘목의 생존 여부 예측
+
+### 모델링 목표
+
+분류 모델을 이용하여 2 성장기가 지난 묘목(약 120일 후)의 생존율을 예측합니다.
+
+2 성장기가 지나면 생존율이 매우 안정화되므로, 해당 기간까지의 생존율 예측이 매우 중요합니다.
+
+**[실제 묘목의 생존율 그래프 위치]**
+> *시간에 따른 묘목 생존율 변화를 보여주는 그래프*
+
+### 사용 모델
+3개의 분류 모델을 사용하여 분류를 수행하였습니다:
+
+#### 1. Logistic Regression
+**[Logistic Regression 결과 시각화 위치]**
+> *모델 성능 지표, ROC 곡선, 특성 중요도 등*
+
+**주요 결과:**
+- 정확도: [수치]
+- 정밀도: [수치]
+- 재현율: [수치]
+- F1-score: [수치]
+
 #### 2. Random Forest
 **[Random Forest 결과 시각화 위치]**
 > *모델 성능 지표, 특성 중요도, 트리 구조 등*
@@ -127,6 +205,7 @@ Precision       : 0.5842696629213483
 Recall          : 0.4482758620689655
 F1 Score        : 0.5073170731707317
 ```
+
 ##### 2.3. StratifiedKFold 랜덤포레스트
 ```python
 # StratifiedKFold 교차 검증
@@ -147,6 +226,7 @@ Precision       : 0.5824175824175825
 Recall          : 0.4732142857142857
 F1 Score        : 0.5221674876847291
 ```
+
 ##### 2.4. GridSearchCV 랜덤포레스트
 ```python
 # GridSearchCV 사용
@@ -164,12 +244,275 @@ param_grid = {
 grid = GridSearchCV(rf, param_grid, scoring='accuracy', cv=5, n_jobs=-1)
 
 grid.fit(X_train, y_train)
+
+# 저장된 모델 불러오기
+
+best_rf = grid.best_estimator_
+best_rf.fit(X_train, y_train)
+best_rf.score(X_train, y_train)
+
+print("best_rf 모델 객체   : ", best_rf)
+print("best_rf 모델 정확도 : ", best_rf.score(X_train, y_train))
 ```
 ```sh
 최적의 파라미터             : {'max_depth': None, 'max_features': 'sqrt', 'min_samples_leaf': 1, 'min_samples_split': 10, 'n_estimators': 100}
 최적의 파라미터로 학습된 모델: RandomForestClassifier(min_samples_split=10, random_state=42)
 최적화된 정확도 점수        : 0.7861241202130221
+===============================================================
+best_rf 모델 객체   :  RandomForestClassifier(min_samples_split=10, random_state=42)
+best_rf 모델 정확도 :  0.9146238377007607
 ```
+
+##### 2.5. HyperOpt 랜덤포레스트
+```python
+# HyperOpt를 사용한 Random Forest 하이퍼 파라미터 튜닝
+import hyperopt
+from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
+
+# Random Forest 하이퍼 파라미터 탐색 범위 정의
+search_space = {
+    'n_estimators': hp.quniform('n_estimators', 100, 500, 50),  # 트리 개수: 100~500 (50 간격)
+    'max_depth': hp.quniform('max_depth', 3, 20, 1),           # 트리 최대 깊이: 3~20
+    'min_samples_split': hp.quniform('min_samples_split', 2, 20, 1),  # 내부 노드 분할 최소 샘플 수
+    'min_samples_leaf': hp.quniform('min_samples_leaf', 1, 10, 1),    # 리프 노드 최소 샘플 수
+    'max_features': hp.choice('max_features', [None, 'sqrt', 'log2']),  # 특성 선택 방법 ('auto' 대신 None 사용)
+    'bootstrap': hp.choice('bootstrap', [True, False]),        # 부트스트랩 샘플링 여부
+    'random_state': 42
+}
+
+# 목적함수 정의
+def rf_objective(search_space):
+
+    # 하이퍼파라미터 설정
+    rf_params = {
+        'n_estimators': int(search_space['n_estimators']),
+        'max_depth': int(search_space['max_depth']),
+        'min_samples_split': int(search_space['min_samples_split']),
+        'min_samples_leaf': int(search_space['min_samples_leaf']),
+        'max_features': search_space['max_features'],
+        'bootstrap': search_space['bootstrap'],
+        'random_state': 42,
+        'n_jobs': -1  # 병렬 처리
+    }
+    
+    # Random Forest 모델 생성
+    rf_model = RandomForestClassifier(**rf_params)
+
+    # HyperOpt는 최소화 문제이므로 정확도를 음수로 변환
+    return {
+        'loss': -mean_accuracy,  # 최소화를 위해 음수로 변환
+        'status': STATUS_OK,
+        'accuracy': mean_accuracy  # 추가 정보로 실제 정확도도 저장
+    }
+
+# HyperOpt 최적화 실행
+print("=== HyperOpt를 사용한 Random Forest 하이퍼파라미터 최적화 시작 ===")
+
+# Trials 객체 생성 (최적화 과정 저장)
+trials = Trials()
+
+# fmin 함수로 최적화 실행
+best_val = fmin(
+    fn=rf_objective,           # 목적함수
+    space=search_space,        # 탐색 공간
+    algo=tpe.suggest,         # TPE (Tree-structured Parzen Estimator) 알고리즘
+    max_evals=30,             # 최대 평가 횟수 (안정성을 위해 30으로 조정)
+    trials=trials,            # 최적화 과정 저장 객체
+    verbose=1                 # 진행상황 출력
+)
+
+# 최적 하이퍼파라미터로 Random Forest 모델 재훈련 및 평가
+
+# max_features 매핑 (HyperOpt 결과를 RandomForest 파라미터로 변환)
+max_features_mapping = {0: None, 1: 'sqrt', 2: 'log2'}
+
+# 최적 파라미터를 적절한 타입으로 변환
+optimal_params_fixed = {
+    'n_estimators': int(best_val['n_estimators']),
+    'max_depth': int(best_val['max_depth']),
+    'min_samples_split': int(best_val['min_samples_split']),
+    'min_samples_leaf': int(best_val['min_samples_leaf']),
+    'max_features': max_features_mapping[best_val['max_features']],  # 정수를 문자열로 변환
+    'bootstrap': bool(best_val['bootstrap']),  # bool 타입으로 변환
+    'random_state': 42,
+    'n_jobs': -1
+}
+
+# 최적 파라미터로 Random Forest 모델 생성
+best_rf = RandomForestClassifier(**optimal_params_fixed)
+
+# 전체 훈련 데이터로 모델 재훈련
+best_rf.fit(X_train, y_train)
+```
+```sh
+최고 교차검증 정확도: 0.7874
+
+=== 수정된 최적 하이퍼파라미터로 Random Forest 모델 재훈련 ===
+
+최적 하이퍼파라미터:
+  n_estimators: 500
+  max_depth: 19
+  min_samples_split: 20
+  min_samples_leaf: 3
+  max_features: 0
+  bootstrap: 0
+  random_state: 42
+  n_jobs: -1
+
+=== 최적화된 Random Forest 모델 평가 ===
+Training Score  : 0.878698224852071
+Testing  Score  : 0.8076923076923077
+Cross Validation Score : 0.767098420174664
+===============================================================
+
+=== 최적화된 Random Forest 모델 성능 지표 ===
+Accuracy        : 0.8076923076923077
+Confusion Matrix:
+ [[286  33]
+ [ 47  50]]
+Precision       : 0.6024096385542169
+...
+=== 기존 모델과 성능 비교 ===
+기존 Random Forest 정확도: 0.8269
+최적화된 Random Forest 정확도: 0.8077
+성능 향상: -0.0192
+```
+
+
+**주요 결과:**
+- 정확도: [수치]
+- 정밀도: [수치]
+- 재현율: [수치]
+- F1-score: [수치]
+
+#### 3. XGBoost
+**[XGBoost 결과 시각화 위치]**
+> *모델 성능 지표, 특성 중요도, 학습 곡선 등*
+
+**주요 결과:**
+- 정확도: [수치]
+- 정밀도: [수치]
+- 재현율: [수치]
+- F1-score: [수치]
+
+**[모델 비교 분석 시각화 위치]**
+> *3개 모델의 성능 비교 차트, 혼동행렬 비교 등*
+
+---
+
+## 3. 기존 모델의 한계 및 새로운 모델 기획
+
+### 기존 모델의 한계점
+- 기존 모델은 관측 종료 시점(해당 데이터에서는 115.5일 후)에서의 생존 여부만 예측 가능
+- 실무에서는 다양한 시기의 생존율을 예측해야 할 필요가 있고, 또한 적은 데이터만을 가지고 예측하기도 해야 함
+
+### 새로운 접근 방향
+1. **모델의 일부 특성만을 이용한 모델 구현** (특성 선택 이용)
+2. **생존율을 시간에 따라 예측할 수 있는 모델 구현**
+
+**[기존 모델 vs 새로운 모델 비교 다이어그램 위치]**
+> *두 접근 방식의 차이점을 보여주는 개념도*
+
+---
+
+## 4. 시간에 따른 생존율을 예측하는 모델 구현 및 평가
+
+### 모델링 목표
+단순히 생존 여부만을 판단하는 모델이 아니라, 시간에 따른 개체별 위험도와 주기적인 관찰이 필요한 개체 등을 구분하기 위해서는 시간에 따른 생존 곡선을 그릴 수 있는 모델이 필요합니다.
+
+### 구현 모델
+다음 두 모델을 기반으로 평가를 진행하였습니다:
+
+#### 1. XGBoost with Cox
+**[XGBoost with Cox 모델 결과 시각화 위치]**
+> *생존 곡선, 위험도 점수 분포, 성능 지표 등*
+
+#### 2. Random Survival Forest (RSF)
+**[Random Survival Forest 결과 시각화 위치]**
+> *생존 곡선, 위험도 점수 분포, 성능 지표 등*
+
+### 모델 평가 결과
+위 두 모델을 기반으로 평가한 결과, **RSF가 좋은 성능**을 보였습니다.
+
+**[최종 모델 평가 결과 시각화 위치]**
+> *생존 확률 그래프, 혼동 행렬, 모델 비교 결과 등*
+
+### 결과 분석
+- 위 모델을 기반으로 생존 확률 그래프, 혼동 행렬 등을 출력하고 모델 평가 및 결과 분석을 수행하였습니다.
+
+---
+
+## 5. 모델 평가 방식과 성능 고도화 기법
+
+### 평가 방식
+1. **생존율 모델에서 threshold를 이용한 이진 분류 후 정확도 평가**
+2. **KFold를 이용한 모델의 정확도 측정**
+3. **GridSearchCV를 이용한 최적의 파라미터 탐색**
+
+**[모델 평가 과정 시각화 위치]**
+> *K-fold 교차검증 결과, 하이퍼파라미터 튜닝 과정 등*
+
+### 성능 고도화 기법
+**[최적화 결과 비교 시각화 위치]**
+> *파라미터 튜닝 전후 성능 비교, 최적 파라미터 조합 등*
+
+---
+
+## 6. 트러블 슈팅
+
+### 주요 해결 과제들
+
+#### 1. 생존율 모델 평가 방식의 문제
+**문제점:**
+- 생존율 모델의 경우 위험 점수를 기반으로 한 평가 방식으로는 기존 모델과 비교 불가
+
+**해결책:**
+- 위험 점수를 기반으로 모델을 이진 분류한 후 정확도를 계산하는 방식으로 기존 모델과 비교
+
+#### 2. 생존율 모델의 입력 데이터 구조 문제
+**문제점:**
+- 생존율 모델의 경우, 특성, 사건 발생 또는 관측 종료 시간, 사건 발생 여부 3개의 데이터를 모델에 전달
+- GridSearchCV 등은 모두 X, y 만을 받는 모델을 기반으로 함
+
+**해결책:**
+- 인자를 2개 (특성, 시간과 사건) 혹은 3개로 모두 받을 수 있도록 메소드 디자인
+
+#### 3. 분류 라벨링의 직관성 문제
+**문제점:**
+- 생존율 예측 → 생존: 1, 사망: 0으로 분류하는 것이 자연스럽지만, 때문에 사건 발생인 사망이 0으로 분류되어 confusion matrix를 기반으로 한 평가 지표에 오류 발생
+
+**해결책:**
+- 해당 함수를 새로 정의하여 해결
+
+**[트러블 슈팅 과정 시각화 위치]**
+> *문제 해결 전후 비교, 새로운 평가 함수의 결과 등*
+
+---
+
+## 결론 및 향후 과제
+
+### 주요 성과
+1. 단순 분류 모델에서 시작하여 시간에 따른 생존율을 예측하는 고도화된 모델까지 구현
+2. Random Survival Forest 모델이 가장 우수한 성능을 보임
+3. 실무에 적용 가능한 다양한 시점에서의 생존율 예측 모델 완성
+
+### 향후 개선 방향
+- 더 적은 특성을 사용한 모델의 성능 검증
+- 실시간 데이터 수집 환경에서의 모델 성능 평가
+- 다양한 환경 조건에서의 모델 일반화 성능 향상
+
+---
+
+## 기술 스택
+- **데이터 분석**: Python, Pandas, NumPy
+- **시각화**: Matplotlib, Seaborn
+- **머신러닝**: Scikit-learn, XGBoost
+- **생존 분석**: lifelines, scikit-survival
+- **모델 평가**: KFold, GridSearchCV
+
+## 데이터셋 정보
+- **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
+- **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
 
 **주요 결과:**
 - 정확도: [수치]
@@ -338,4 +681,5 @@ F1 Score        : 0.5869565217391305
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
 
