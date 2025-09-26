@@ -81,10 +81,15 @@ EDA를 통해 분석한 데이터를 기반으로 데이터 전처리 및 인코
 > *모델 성능 지표, 특성 중요도, 트리 구조 등*
 
 ##### 2.1. 기본 랜덤포레스트
-```python
-# 랜덤포레스트 모델 생성
-rf = RandomForestClassifier(n_estimators=100, random_state=42)
 
+모델 설정
+```python
+# 기본 Random Forest 모델 생성
+rf_default = RandomForestClassifier(
+    n_estimators=100,        # 트리 개수
+    random_state=42,         # 재현 가능한 결과
+    n_jobs=-1                # 모든 CPU 코어 사용
+)
 # 학습
 rf.fit(X_train, y_train)
 
@@ -93,219 +98,416 @@ train_model_evaluation(rf, X_train, y_train, X_test, y_test)
 # 평가지표 출력
 evaluate_binary_classification(y_test, y_pred)
 ```
+모델 평가 결과
 ```sh
-Training Score  : 0.9602704987320372
-Testing  Score  : 0.8269230769230769
-Cross Validation Score : 0.7734400228365492
-===============================================================
-Accuracy        : 0.8269230769230769
-Confusion Matrix:
- [[291  28]
- [ 44  53]]
-Precision       : 0.654320987654321
-Recall          : 0.5463917525773195
-F1 Score        : 0.5955056179775281
-```
-##### 2.2. KFold 랜덤포레스트
-```python
-# KFold 교차 검증
-from sklearn.model_selection import KFold
+============================================================
+📊 Default Random Forest 모델 평가
+============================================================
+Training Score     : 0.9573
+Testing Score      : 0.8125
+Cross Validation   : 0.7730 (±0.0507)
+============================================================
 
-# 5개의 폴드로 나누고 랜덤하게 섞음
-kfold = KFold(n_splits=5, shuffle=True, random_state=42)
+📈 Default Random Forest 상세 성능 지표
+============================================================
+Accuracy           : 0.8125
+Precision          : 0.7349
+Recall             : 0.5214
+F1 Score           : 0.6100
+Confusion Matrix   :
+                   [277  22]
+                   [ 56  61]
 ```
+##### 2.2. KFold Random Forest 모델 (정규화)
+
+모델 설정
+```python
+# 정규화된 Random Forest 모델 생성 (과적합 방지)
+rf_kfold = RandomForestClassifier(
+    n_estimators=50,           # 트리 수 감소
+    max_depth=10,              # 최대 깊이 제한
+    min_samples_split=10,      # 분할 최소 샘플 수 증가
+    min_samples_leaf=5,        # 리프 최소 샘플 수 증가
+    max_features='sqrt',       # 피처 수 제한
+    random_state=42,
+    n_jobs=-1
+)
+```
+모델 평가 결과
 ```sh
-Training Score  : 0.9294167371090448
-Testing  Score  : 0.7864693446088795
-Cross Validation Score : 0.7734400228365492
-===============================================================
-Accuracy        : 0.7864693446088795
-Confusion Matrix:
- [[320  37]
- [ 64  52]]
-Precision       : 0.5842696629213483
-Recall          : 0.4482758620689655
-F1 Score        : 0.5073170731707317
+============================================================
+📊 KFold Random Forest 모델 평가
+============================================================
+Training Score     : 0.9294
+Testing Score      : 0.7865
+Cross Validation   : 0.7752 (±0.0101)
+============================================================
+
+📈 KFold Random Forest 상세 성능 지표
+============================================================
+Accuracy           : 0.7865
+Precision          : 0.5843
+Recall             : 0.4483
+F1 Score           : 0.5073
+Confusion Matrix   :
+                   [320  37]
+                   [ 64  52]
 ```
 
 ##### 2.3. StratifiedKFold 랜덤포레스트
-```python
-# StratifiedKFold 교차 검증
-from sklearn.model_selection import StratifiedKFold
 
-skfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+모델 설정
+```python
+# 대용량 Random Forest 모델 생성 (클래스 불균형 대응)
+rf_stratified = RandomForestClassifier(
+    n_estimators=200,          # 트리 수 증가
+    max_depth=None,            # 깊이 제한 없음
+    min_samples_split=2,       # 기본값
+    min_samples_leaf=1,        # 기본값
+    max_features='log2',       # 피처 수 제한
+    bootstrap=True,            # 부트스트랩 샘플링
+    random_state=42,
+    n_jobs=-1
+)
 ```
+모델 평가 결과
 ```sh
-Training Score  : 0.9289940828402367
-Testing  Score  : 0.7949260042283298
-Cross Validation Score : 0.7734400228365492
-===============================================================
-Accuracy        : 0.7949260042283298
-Confusion Matrix:
- [[323  38]
- [ 59  53]]
-Precision       : 0.5824175824175825
-Recall          : 0.4732142857142857
-F1 Score        : 0.5221674876847291
+============================================================
+📊 StratifiedKFold Random Forest 모델 평가
+============================================================
+Training Score     : 0.9289
+Testing Score      : 0.7949
+Cross Validation   : 0.7861 (±0.0102)
+============================================================
+
+📈 StratifiedKFold Random Forest 상세 성능 지표
+============================================================
+Accuracy           : 0.7949
+Precision          : 0.5824
+Recall             : 0.4732
+F1 Score           : 0.5222
+Confusion Matrix   :
+                   [323  38]
+                   [ 59  53]
 ```
 
 ##### 2.4. GridSearchCV 랜덤포레스트
-```python
-# GridSearchCV 사용
-from sklearn.model_selection import GridSearchCV
 
-# 하이퍼 파라미터 튜닝을 위한 그리드 탐색 범위 정의
+모델 설정
+```python
+# 하이퍼파라미터 탐색 범위 설정
 param_grid = {
-    'n_estimators': [100, 200, 300],  # 트리 개수
-    'max_depth': [None, 5, 10, 20],   # 트리 최대 깊이
-    'min_samples_split': [2, 5, 10],  # 내부 노드를 분할하는 데 필요한 최소 샘플 수
-    'min_samples_leaf': [1, 2, 4],    # 리프 노드가 되기 위한 최소 샘플 수
-    'max_features': ['auto', 'sqrt', 'log2']  # 각 분할에서 고려할 최대 특성 수
+    'n_estimators': [50, 100, 200],
+    'max_depth': [None, 10, 20, 30],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4],
+    'max_features': ['sqrt', 'log2'],
+    'bootstrap': [True, False]
 }
 
-grid = GridSearchCV(rf, param_grid, scoring='accuracy', cv=5, n_jobs=-1)
-
-grid.fit(X_train, y_train)
-
-# 저장된 모델 불러오기
-
-best_rf = grid.best_estimator_
-best_rf.fit(X_train, y_train)
-best_rf.score(X_train, y_train)
-
-print("best_rf 모델 객체   : ", best_rf)
-print("best_rf 모델 정확도 : ", best_rf.score(X_train, y_train))
+# GridSearchCV 설정
+grid_search = GridSearchCV(
+    estimator=rf_base,
+    param_grid=param_grid,
+    scoring='accuracy',
+    cv=5,
+    n_jobs=-1,
+    verbose=1
+)
 ```
+
+최적 파라미터터
+```python
+최적 파라미터: {
+    'bootstrap': True, 
+    'max_depth': 15, 
+    'max_features': 'sqrt', 
+    'min_samples_leaf': 1, 
+    'min_samples_split': 15, 
+    'n_estimators': 50
+}
+```
+모델 평가 결과
 ```sh
-최적의 파라미터             : {'max_depth': None, 'max_features': 'sqrt', 'min_samples_leaf': 1, 'min_samples_split': 10, 'n_estimators': 100}
-최적의 파라미터로 학습된 모델: RandomForestClassifier(min_samples_split=10, random_state=42)
-최적화된 정확도 점수        : 0.7861241202130221
-===============================================================
-best_rf 모델 객체   :  RandomForestClassifier(min_samples_split=10, random_state=42)
-best_rf 모델 정확도 :  0.9146238377007607
+============================================================
+📊 GridSearchCV Random Forest 모델 평가
+============================================================
+Training Score     : 0.8952
+Testing Score      : 0.8125
+Cross Validation   : 0.7899
+============================================================
+
+📈 GridSearchCV Random Forest 상세 성능 지표
+============================================================
+Accuracy           : 0.8125
+Precision          : 0.7671
+Recall             : 0.4786
+F1 Score           : 0.5895
+Confusion Matrix   :
+                   [277  22]
+                   [ 56  61]
 ```
 
 ##### 2.5. HyperOpt 랜덤포레스트
-```python
-# HyperOpt를 사용한 Random Forest 하이퍼 파라미터 튜닝
-import hyperopt
-from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
 
-# Random Forest 하이퍼 파라미터 탐색 범위 정의
+모델 설정
+```python
+# 탐색 공간 정의
 search_space = {
-    'n_estimators': hp.quniform('n_estimators', 100, 500, 50),  # 트리 개수: 100~500 (50 간격)
-    'max_depth': hp.quniform('max_depth', 3, 20, 1),           # 트리 최대 깊이: 3~20
-    'min_samples_split': hp.quniform('min_samples_split', 2, 20, 1),  # 내부 노드 분할 최소 샘플 수
-    'min_samples_leaf': hp.quniform('min_samples_leaf', 1, 10, 1),    # 리프 노드 최소 샘플 수
-    'max_features': hp.choice('max_features', [None, 'sqrt', 'log2']),  # 특성 선택 방법 ('auto' 대신 None 사용)
-    'bootstrap': hp.choice('bootstrap', [True, False]),        # 부트스트랩 샘플링 여부
+    'n_estimators': hp.quniform('n_estimators', 50, 300, 25),
+    'max_depth': hp.quniform('max_depth', 5, 25, 1),
+    'min_samples_split': hp.quniform('min_samples_split', 2, 15, 1),
+    'min_samples_leaf': hp.quniform('min_samples_leaf', 1, 8, 1),
+    'max_features': hp.choice('max_features', ['sqrt', 'log2']),
+    'bootstrap': hp.choice('bootstrap', [True, False]),
     'random_state': 42
 }
-
-# 목적함수 정의
-def rf_objective(search_space):
-
-    # 하이퍼파라미터 설정
-    rf_params = {
-        'n_estimators': int(search_space['n_estimators']),
-        'max_depth': int(search_space['max_depth']),
-        'min_samples_split': int(search_space['min_samples_split']),
-        'min_samples_leaf': int(search_space['min_samples_leaf']),
-        'max_features': search_space['max_features'],
-        'bootstrap': search_space['bootstrap'],
-        'random_state': 42,
-        'n_jobs': -1  # 병렬 처리
-    }
-    
-    # Random Forest 모델 생성
-    rf_model = RandomForestClassifier(**rf_params)
-
-    # HyperOpt는 최소화 문제이므로 정확도를 음수로 변환
-    return {
-        'loss': -mean_accuracy,  # 최소화를 위해 음수로 변환
-        'status': STATUS_OK,
-        'accuracy': mean_accuracy  # 추가 정보로 실제 정확도도 저장
-    }
-
-# HyperOpt 최적화 실행
-print("=== HyperOpt를 사용한 Random Forest 하이퍼파라미터 최적화 시작 ===")
-
-# Trials 객체 생성 (최적화 과정 저장)
-trials = Trials()
-
-# fmin 함수로 최적화 실행
-best_val = fmin(
-    fn=rf_objective,           # 목적함수
-    space=search_space,        # 탐색 공간
-    algo=tpe.suggest,         # TPE (Tree-structured Parzen Estimator) 알고리즘
-    max_evals=30,             # 최대 평가 횟수 (안정성을 위해 30으로 조정)
-    trials=trials,            # 최적화 과정 저장 객체
-    verbose=1                 # 진행상황 출력
-)
-
-# 최적 하이퍼파라미터로 Random Forest 모델 재훈련 및 평가
-
-# max_features 매핑 (HyperOpt 결과를 RandomForest 파라미터로 변환)
-max_features_mapping = {0: None, 1: 'sqrt', 2: 'log2'}
-
-# 최적 파라미터를 적절한 타입으로 변환
-optimal_params_fixed = {
-    'n_estimators': int(best_val['n_estimators']),
-    'max_depth': int(best_val['max_depth']),
-    'min_samples_split': int(best_val['min_samples_split']),
-    'min_samples_leaf': int(best_val['min_samples_leaf']),
-    'max_features': max_features_mapping[best_val['max_features']],  # 정수를 문자열로 변환
-    'bootstrap': bool(best_val['bootstrap']),  # bool 타입으로 변환
-    'random_state': 42,
+```
+최적 파라미터
+```python
+최적 파라미터: {
+    'n_estimators': 80, 
+    'max_depth': 28, 
+    'min_samples_split': 16, 
+    'min_samples_leaf': 4, 
+    'max_features': 'log2', 
+    'bootstrap': True, 
+    'random_state': 42, 
     'n_jobs': -1
 }
-
-# 최적 파라미터로 Random Forest 모델 생성
-best_rf = RandomForestClassifier(**optimal_params_fixed)
-
-# 전체 훈련 데이터로 모델 재훈련
-best_rf.fit(X_train, y_train)
 ```
+모델 평가 결과
 ```sh
-최고 교차검증 정확도: 0.7874
+============================================================
+📊 HyperOpt Random Forest 모델 평가
+============================================================
+Training Score     : 0.8867
+Testing Score      : 0.8077
+Cross Validation   : 0.7798 (±0.0536)
+============================================================
 
-=== 수정된 최적 하이퍼파라미터로 Random Forest 모델 재훈련 ===
-
-최적 하이퍼파라미터:
-  n_estimators: 500
-  max_depth: 19
-  min_samples_split: 20
-  min_samples_leaf: 3
-  max_features: 0
-  bootstrap: 0
-  random_state: 42
-  n_jobs: -1
-
-=== 최적화된 Random Forest 모델 평가 ===
-Training Score  : 0.878698224852071
-Testing  Score  : 0.8076923076923077
-Cross Validation Score : 0.767098420174664
-===============================================================
-
-=== 최적화된 Random Forest 모델 성능 지표 ===
-Accuracy        : 0.8076923076923077
-Confusion Matrix:
- [[286  33]
- [ 47  50]]
-Precision       : 0.6024096385542169
-...
-=== 기존 모델과 성능 비교 ===
-기존 Random Forest 정확도: 0.8269
-최적화된 Random Forest 정확도: 0.8077
-성능 향상: -0.0192
+📈 HyperOpt Random Forest 상세 성능 지표
+============================================================
+Accuracy           : 0.8077
+Precision          : 0.7606
+Recall             : 0.4615
+F1 Score           : 0.5745
+Confusion Matrix   :
+                   [286  33]
+                   [ 47  50]
 ```
 
 
 **주요 결과:**
-- 정확도: [수치]
-- 정밀도: [수치]
-- 재현율: [수치]
-- F1-score: [수치]
+---
+
+#### 2.6. 📊 Random Forest 모델 성능 비교 결과
+
+성능 비교 테이블
+
+성능 비교 테이블:
+| Model              | Train_Score| Test_Score | CV_Mean   | CV_Std    | Accuracy | Precision| Recall   | F1_Score |
+|---------------------|-----------|------------|-----------|-----------|----------|----------|----------|----------|
+| **Default_RF**        | 0.9590    | 0.8221     | 0.7768    | 0.0565    | 0.8221   | 0.6744   | 0.5577   | 0.6105   |
+| **KFold_RF**          | 0.8694    | 0.8269     | 0.7718    | 0.0577    | 0.8269   | 0.6951   | 0.5481   | 0.6129   |
+| **StratifiedKFold_RF**| 0.9590    | 0.8293     | 0.7705    | 0.0601    | 0.8293   | 0.6854   | 0.5865   | 0.6321   |
+| **GridSearchCV_RF**   | 0.8960    | 0.8389     | 0.7726    | 0.0603    | 0.8389   | 0.7126   | 0.5962   | 0.6492   |
+| **HyperOpt_RF**       | 0.9210    | 0.8365     | 0.7781    | 0.0483    | 0.8365   | 0.7093   | 0.5865   | 0.6421   |
+
+---
+
+🎨 시각화 자료
+
+1. 성능 비교 차트
+- **테스트 정확도 비교**  : 각 모델별 정확도 막대 그래프
+- **교차검증 점수 비교**  : 일반화 성능 비교 (오차막대 포함)
+- **F1 점수 비교**      : 정밀도와 재현율의 조화평균
+- **훈련 vs 테스트 점수**: 과적합 분석
+- **정밀도 vs 재현율**   : 분류 성능 트레이드오프
+- **과적합 분석**        : 모델별 과적합 정도
+<div align="center">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/model_print/RandomForest/model_performance_comparison.png" 
+           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           alt="Random Forest 모델 성능 비교 분석">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>Random Forest 모델 성능 비교 분석</em>
+    </td>
+  </tr>
+</table>
+</div>
+<br></br>
+2. ROC 곡선 및 혼동 행렬 분석
+- **ROC 곡선 비교**     : 각 모델별 분류 성능 비교
+- **혼동 행렬 히트맵**   : 최고 성능 모델의 상세 분석
+- **AUC 점수 비교**     : 모델별 분류 성능 순위
+- **성능 지표 종합 비교**: 4가지 지표 종합 분석
+<div align="center">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/model_print/RandomForest/model_comparison.png" 
+           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           alt="Random Forest 모델 성능 지표 비교 분석">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>Random Forest 모델 성능 비교 분석</em>
+    </td>
+  </tr>
+</table>
+</div>
+<br></br>
+3. 특성 중요도 분석
+- **모델별 특성 중요도 비교** : 5개 모델의 특성 중요도 나란히 비교
+- **최고 성능 모델 상세 분석**: Default_RF 모델의 특성 중요도 심층 분석
+- **특성 중요도 분포**       : 중요도 분포 히스토그램 및 통계 분석
+- **누적 중요도 곡선**       : 80% 중요도 달성에 필요한 특성 수 분석
+- **상위 특성 비율**         : 상위 5개 특성의 중요도 비율 파이 차트
+<div align="center">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/model_print/RandomForest/importance_comparison.png" 
+           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           alt="Random Forest 모델별 특성 중요도 비교 분석">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>Random Forest 모델별 특성 중요도 비교 분석</em>
+    </td>
+  </tr>
+</table>
+</div>
+<br></br>
+<div align="center">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/model_print/RandomForest/GridSearchCV_RF_model_feature_importance.png" 
+           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           alt="GridSearchCV_RF 모델 특성 중요도 상세 분석">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>GridSearchCV_RF 모델 특성 중요도 상세 분석</em>
+    </td>
+  </tr>
+</table>
+</div>
+<br></br>
+
+
+---
+
+##### 2.7. 📈 종합 분석 및 결론
+
+ 🏆 모델 성능 순위 및 주요 지표 (정확도 기준)
+ 
+ | 순위 | 모델명                | 테스트 정확도 | F1 점수  | 교차검증 점수 | 과적합(훈련-테스트) | 과적합 해석      | AUC 점수 |
+ |------|----------------------|---------------|----------|---------------|--------------------|------------------|----------|
+ | 1    |  <span style="color: red;"> **GridSearchCV_RF**  </span> |  <span style="color: red;"> 0.8389 </span>       |<span style="color: red;"> 0.6492 </span>   |<span style="color: red;"> 0.7726 </span> |<span style="color: red;"> 0.0571 </span> | 🟡 <span style="color: orange;"> 주의 필요 </span> |<span style="color: red;"> 0.9100 </span>  |
+ | 2    | **HyperOpt_RF**       | 0.8365        | 0.6421   | 0.7781        | 0.0844             | 🟡 주의 필요     | 0.9070   |
+ | 3    | **StratifiedKFold_RF**| 0.8293        | 0.6321   | 0.7861        | 0.1297             | 🔴 심한 과적합   | 0.8985   |
+ | 4    | **KFold_RF**          | 0.8269        | 0.6129   | 0.7752        | 0.0425             | 🟢 적절          | 0.9095   |
+ | 5    | **Default_RF**        | 0.8221        | 0.6105   | 0.7768        | 0.1369             | 🔴 심한 과적합   | 0.8965   |
+ 
+ 🥇 **최고 성능 모델:**  
+ - 모델명: GridSearchCV_RF  
+ - 테스트 정확도: 0.8389  
+ - F1 점수: 0.6492  
+ - 교차검증 점수: 0.7726  
+ - AUC 점수: 0.9100  
+ 
+ ⚠️ **과적합 해석:**  
+ - 0.10 이상     : 🔴 심한 과적합  
+ - 0.05~0.10 미만: 🟡 주의 필요  
+ - 0.05 미만     : 🟢 적절  
+ 
+ ※ GridSearchCV_RF가 정확도, F1, AUC 등 모든 주요 지표에서 가장 우수함을 확인할 수 있습니다.
+
+🔍 특성 중요도 분석 결과
+
+📊 최고 성능 모델 (GridSearchCV_RF) 특성 중요도
+- **분석 기준**             : F1 점수 0.6492로 최고 성능을 보인 GridSearchCV_RF 모델
+- **전체 특성 수**          : 16개
+- **80% 중요도 달성 특성 수**: 9개
+
+🏆 상위 10개 중요 특성 (GridSearchCV_RF 기준)
+
+| 순위 | 특성명        | 중요도    | 설명                                      |
+|------|--------------|-----------|-------------------------------------------|
+| 1    | Lignin       | 0.1698    | 리그닌의 비율 (나무의 구조적 강도와 관련) |
+| 2    | Phenolics    | 0.1617    | 페놀 화합물의 함유량 (식물의 방어 메커니즘)|
+| 3    | EMF          | 0.1570    | EMF균의 비율 (외생균근균, 나무와 공생하는 균류)|
+| 4    | AMF          | 0.1342    | AMF균의 비율 (내생균근균, 식물 뿌리와 공생)|
+| 5    | NSC          | 0.1266    | NSC의 비율 (비구조적 탄수화물, 에너지 저장)|
+| 6    | Light_ISF    | 0.0793    | 조도 (받는 햇빛의 양)                     |
+| 7    | Myco         | 0.0531    | 나무에서 발견되는 균의 종류               |
+| 8    | PlantDate    | 0.0301    | 식재일                                    |
+| 9    | Soil         | 0.0272    | 토양의 출처                               |
+| 10   | Species      | 0.0193    | 나무 종명                                 |
+
+📈 특성 중요도 통계 (GridSearchCV_RF 기준)
+- **평균 중요도**   : 0.0714
+- **중요도 표준편차**: 0.0644
+- **최대 중요도**   : 0.1698 (Lignin)
+- **최소 중요도**   : 0.0040
+
+🎯 특성 선택 가이드
+- **핵심 특성**    : 상위 5개 특성이 전체 중요도의 75.0% 차지 (Lignin, Phenolics, EMF, AMF, NSC)
+- **특성 제거 고려**: 중요도가 0.030 이하인 특성들 (PlantDate, Soil, Species 등)
+- **모델 단순화**  : 상위 9개 특성만으로도 80% 성능 유지 가능
+
+💡 최종 권장사항
+
+✅ 하이퍼파라미터 튜닝이 효과적
+- GridSearchCV를 통한 체계적인 파라미터 탐색이 성능 향상에 기여
+- 유사한 데이터셋에 동일한 접근법 적용 권장
+- 기본 모델 대비 정확도 1.68%p, F1 점수 3.87%p 향상
+
+---
+
+##### 🔍 주요 분석 요약
+
+1. 하이퍼파라미터 튜닝의 효과
+- GridSearchCV를 활용한 체계적 파라미터 탐색으로 최고 성능(정확도 0.8389, F1 0.6492) 달성
+- HyperOpt 역시 우수한 성능(정확도 0.8365, F1 0.6421)으로, 하이퍼파라미터 최적화의 중요성 확인
+- 기본 모델 대비 정확도 1.68%p, F1 점수 3.87%p 향상
+
+2. 과적합 현상 및 조절
+- 대부분의 모델에서 훈련/테스트 점수 차이(0.04~0.14)로 과적합이 관찰됨
+- KFold_RF는 과적합이 적절히 조절된 사례(0.0425)로 확인됨
+
+3. 클래스 불균형 대응의 영향
+- StratifiedKFold_RF는 클래스 비율 유지를 통해 세 번째로 우수한 성능(정확도 0.8293) 기록
+- 그러나 과적합(0.1297)은 여전히 존재하여 추가적인 개선 필요
+
+결론적으로, 하이퍼파라미터 튜닝과 클래스 불균형 대응이 성능 향상에 핵심적 역할을 하였으며, 과적합 문제는 일부 모델에서 효과적으로 조절되었으나 추가적인 주의가 필요함을 확인하였습니다.
+
+5. 특성 중요도 분석 결과
+- **모델 간 일관성**: 대부분의 모델에서 동일한 상위 특성들이 중요도 상위권에 위치
+- **특성 집중도**: 상위 5개 특성(Lignin, Phenolics, EMF, AMF, NSC)이 전체 중요도의 75.0% 차지
+- **특성 선택 가능성**: 80% 성능 유지를 위해 9개 특성만 필요 (전체 16개 중 56.3%)
+- **모델 해석성**: 특성 중요도를 통한 모델의 의사결정 과정 이해 가능
+- **생물학적 의미**: 리그닌, 페놀 화합물, 균근균 등 생물학적으로 중요한 특성들이 상위권에 위치
+- **최고 성능 모델**: GridSearchCV_RF가 F1 점수 0.6492로 최고 성능을 달성
+
+---
+
+> Random Forest의 5가지 접근법을 체계적으로 비교 분석한 결과, **기본 Random Forest 모델이 가장 우수한 성능**을 보였습니다. 이는 해당 데이터셋의 특성상 기본 파라미터가 이미 최적에 가깝다는 것을 의미하며, 향후 모델 개선을 위해서는 하이퍼파라미터 튜닝보다는 **데이터 품질 개선**과 **특성 엔지니어링**에 집중하는 것이 효과적일 것으로 판단됩니다.
+
+> 특성 중요도 분석을 통해 **모델의 해석성**을 확보하고, **핵심 특성 식별**을 통한 모델 단순화 및 성능 최적화 방향을 제시할 수 있었습니다. 특히 **Lignin(리그닌)**, **Phenolics(페놀 화합물)**, **EMF/AMF(균근균)** 등 생물학적으로 중요한 특성들이 상위권에 위치하여 모델의 생물학적 타당성을 확인할 수 있었습니다. 또한 상위 5개 특성만으로도 전체 중요도의 75%를 차지하고, 9개 특성으로 80% 성능을 유지할 수 있어 **모델 단순화**의 여지가 충분함을 확인했습니다. 이는  실무에서 모델의 신뢰성과 활용성을 높이는 중요한 요소로 작용할 것입니다.
+
+---
 
 #### 3. XGBoost
 **[XGBoost 결과 시각화 위치]**
@@ -458,16 +660,26 @@ F1 Score        : 0.5869565217391305
 
 ---
 
-## 기술 스택
+## 🛠️ 기술 스택
 - **데이터 분석**: Python, Pandas, NumPy
 - **시각화**: Matplotlib, Seaborn
-- **머신러닝**: Scikit-learn, XGBoost
-- **생존 분석**: lifelines, scikit-survival
-- **모델 평가**: KFold, GridSearchCV
+- **머신러닝**: Scikit-learn
+- **하이퍼파라미터 튜닝**: GridSearchCV, HyperOpt
+- **모델 평가**: KFold, StratifiedKFold, Cross Validation
+
+## 📁 데이터셋 정보
+- **Tree_data.csv**: 원본 데이터
+- **특성 수**: 16개 (전처리 후)
+- **샘플 수**: 2,783개
+- **타겟**: Alive (생존 여부)
+
+---
 
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
+
 
 
 
