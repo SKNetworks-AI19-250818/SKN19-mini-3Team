@@ -116,7 +116,7 @@ def rsf_score_over_time(rsf, test_set, t_max, n_points=100):
     plt.xlabel("Time")
     plt.ylabel("Score")
     plt.ylim(0, 1)   # 비율형 지표이므로 0~1 범위
-    plt.title("RSF Multi-Score vs Time")
+    plt.title("Multi-Score vs Time")
     plt.grid(True)
     plt.legend()
     plt.show()
