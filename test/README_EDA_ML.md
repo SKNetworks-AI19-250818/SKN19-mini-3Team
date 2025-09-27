@@ -596,11 +596,94 @@ rsf.fit(*train_set)    # train_set = (X, y, e)
 단순히 생존 여부만을 판단하는 모델이 아니라, 시간에 따른 개체별 위험도와 주기적인 관찰이 필요한 개체 등을 구분하기 위해서는 시간에 따른 생존 곡선을 그릴 수 있는 모델이 필요합니다.
 
 ### 구현 모델
-다음 두 모델을 기반으로 평가를 진행하였습니다:
+- Cox 모델을 기반으로 상대적인 위험 점수를 추정하고, 기본 위험도 함수를 바탕으로 생존율을 추정하는 XGBoost 모델
+- 생존 곡선 자체를 추정하는 RandomForest 모델
 
 #### 1. XGBoost with Cox
-**[XGBoost with Cox 모델 결과 시각화 위치]**
-> *생존 곡선, 위험도 점수 분포, 성능 지표 등*
+
+##### 모델 구조
+
+| 메서드/속성                  | 설명                          |
+|------------------------------|-------------------------------|
+| `params`                     | XGBoost Hyper parameters           |
+| `model`                      | 학습 / 평가할 모델    |
+| `is_fitted`    | 모델의 학습 여부    |
+| `baseline_survival`    | 기본 위험도 함수    |
+| `__init__()`                 | 모델 파라미터 초기화           |
+| `S0(t)`    | 생존함수 (시간 t에서의 생존 확률을 반환하는 함수)    |
+| `fit(X, y, e)`                  | 학습 수행                     |
+| `predict(X, t)`                 | 모델 예측 : 위험 점수로 출력된 값을 생존함수를 통해 생존확률을 계산        |
+| `score(X, y, e, t)`| 모델 평가 : 생존확률을 통해 이진분류, 정확도를 평가          |
+| `create_mismatch_df(X, y, e, t)`                | 잘못 예측한 데이터를 분석용 데이터프레임으로 반환                |
+| `confusion_matrix(X, y, e, t)`    | confusion matrix 반환    |
+   
+##### 모델 사용 예시
+```python
+xgb_cox = TreeXGBoostCox()
+
+### 모델 학습
+# X : features, y : Event가 발생한 시간, e : Event (사망 - 0, 생존한 상태로 관측 종료 - 1)
+xgb_cox.fit(X, y, e)
+xgb_cox.fit(X, (y, e))    # y, e를 하나의 데이터로 묶어서 전달 가능
+
+### 모델 평가
+# t : 생존율을 예측하고 평가할 시간
+xgb_cox.score(*test_set, t=115.5)
+xgb_cox.confusion_matrix(*test_set, t=115.5)    # t = 115.5 일 때의 예측 결과에 대한 confusion matrix 반환
+```
+   
+##### 모델 성능 평가 및 분석
+```sh
+============================================================
+📊 XGBoost with Cox 모델 평가 ( t = 115.5 )
+============================================================
+Training Score     : 0.7042
+Testing Score      : 0.6822
+============================================================
+
+📈 XGBoost with Cox 상세 성능 지표 ( t = 115.5 )
+============================================================
+Accuracy           : 0.6822
+Precision          : 0.6821
+Recall             : 0.8301
+F1 Score           : 0.7491
+Confusion Matrix   :
+                   [116  123]
+                   [ 54  264]
+```
+   
+<div align="center">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/model_print/XGBoost with Cox/scores.png" 
+           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           alt="Cox와 결합한 XGBoost 모델의 confusion matrix">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>Cox와 결합한 XGBoost 모델의 confusion matrix</em>
+    </td>
+  </tr>
+</table>
+</div>
+<div align="center">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/model_print/XGBoost with Cox/alive_graph.png" 
+           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           alt="Cox와 결합한 XGBoost 모델의 생존 곡선">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>Cox와 결합한 XGBoost 모델의 생존 곡선</em>
+    </td>
+  </tr>
+</table>
+</div>
 
 #### 2. Random Survival Forest (RSF)
 **[Random Survival Forest 결과 시각화 위치]**
@@ -695,7 +778,7 @@ rsf.fit(*train_set)    # train_set = (X, y, e)
 
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
-- **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+- **Tree_Data_processing.csv**: 전처리된 데이터 (2,782행 × 16열)
 
 
 
