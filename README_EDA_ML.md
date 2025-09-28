@@ -323,12 +323,13 @@ Confusion Matrix   :
 - **훈련 vs 테스트 점수**: 과적합 분석
 - **정밀도 vs 재현율**   : 분류 성능 트레이드오프
 - **과적합 분석**        : 모델별 과적합 정도
+<br></br>
 <div align="center">
 <table>
   <tr>
     <td align="center" style="vertical-align: top; padding: 10px;">
       <img src="./data/model_print/RandomForest/model_performance_comparison.png" 
-           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: auto; width: auto; object-fit: contain;"
            alt="Random Forest 모델 성능 비교 분석">
     </td>
   </tr>
@@ -345,12 +346,13 @@ Confusion Matrix   :
 - **혼동 행렬 히트맵**   : 최고 성능 모델의 상세 분석
 - **AUC 점수 비교**     : 모델별 분류 성능 순위
 - **성능 지표 종합 비교**: 4가지 지표 종합 분석
+<br></br>
 <div align="center">
 <table>
   <tr>
     <td align="center" style="vertical-align: top; padding: 10px;">
       <img src="./data/model_print/RandomForest/model_comparison.png" 
-           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: auto; width: auto; object-fit: contain;"
            alt="Random Forest 모델 성능 지표 비교 분석">
     </td>
   </tr>
@@ -373,7 +375,7 @@ Confusion Matrix   :
   <tr>
     <td align="center" style="vertical-align: top; padding: 10px;">
       <img src="./data/model_print/RandomForest/importance_comparison.png" 
-           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: auto; width: auto; object-fit: contain;"
            alt="Random Forest 모델별 특성 중요도 비교 분석">
     </td>
   </tr>
@@ -390,7 +392,7 @@ Confusion Matrix   :
   <tr>
     <td align="center" style="vertical-align: top; padding: 10px;">
       <img src="./data/model_print/RandomForest/GridSearchCV_RF_model_feature_importance.png" 
-           style="max-width: 100%; height: 650px; width: auto; object-fit: contain;"
+           style="max-width: 100%; height: auto; width: auto; object-fit: contain;"
            alt="GridSearchCV_RF 모델 특성 중요도 상세 분석">
     </td>
   </tr>
@@ -696,6 +698,7 @@ rsf.fit(*train_set)    # train_set = (X, y, e)
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
 
 
 
