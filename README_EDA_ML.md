@@ -484,16 +484,16 @@ Confusion Matrix   :
  
  | 순위 | 모델명                | 테스트 정확도 | F1 점수  | 교차검증 점수 | 과적합(훈련-테스트) | 과적합 해석      | AUC 점수 |
  |------|----------------------|---------------|----------|---------------|--------------------|------------------|----------|
- | 1    |  <span style="color: red;"> **GridSearchCV_RF**  </span> |  <span style="color: red;"> 0.8389 </span>       |<span style="color: red;"> 0.6492 </span>   |<span style="color: red;"> 0.7726 </span> |<span style="color: red;"> 0.0571 </span> | 🟡 <span style="color: orange;"> 주의 필요 </span> |<span style="color: red;"> 0.9100 </span>  |
- | 2    | **HyperOpt_RF**       | 0.8365        | 0.6421   | 0.7781        | 0.0844             | 🟡 주의 필요     | 0.9070   |
- | 3    | **StratifiedKFold_RF**| 0.8293        | 0.6321   | 0.7861        | 0.1297             | 🔴 심한 과적합   | 0.8985   |
- | 4    | **KFold_RF**          | 0.8269        | 0.6129   | 0.7752        | 0.0425             | 🟢 적절          | 0.9095   |
- | 5    | **Default_RF**        | 0.8221        | 0.6105   | 0.7768        | 0.1369             | 🔴 심한 과적합   | 0.8965   |
+ | 1    |  <span style="color: red;"> **GridSearchCV_RF**  </span> |  <span style="color: red;"> 0.8389 </span>       |<span style="color: red;"> 0.8761 </span>   |<span style="color: red;"> 0.7726 </span> |<span style="color: red;"> 0.0571 </span> | 🟡 <span style="color: orange;"> 주의 필요 </span> |<span style="color: red;"> 0.9100 </span>  |
+ | 2    | **HyperOpt_RF**       | 0.8365        | 0.8777   | 0.7781        | 0.0844             | 🟡 주의 필요     | 0.9070   |
+ | 3    | **StratifiedKFold_RF**| 0.8293        | 0.8694   | 0.7705        | 0.1297             | 🔴 심한 과적합   | 0.8985   |
+ | 4    | **KFold_RF**          | 0.8269        | 0.8643   | 0.7718        | 0.0425             | 🟢 적절          | 0.9095   |
+ | 5    | **Default_RF**        | 0.8221        | 0.8761   | 0.7768        | 0.1369             | 🔴 심한 과적합   | 0.8965   |
  
  🥇 **최고 성능 모델:**  
  - 모델명: GridSearchCV_RF  
  - 테스트 정확도: 0.8389  
- - F1 점수: 0.6492  
+ - F1 점수: 0.8761  
  - 교차검증 점수: 0.7726  
  - AUC 점수: 0.9100  
  
@@ -502,14 +502,15 @@ Confusion Matrix   :
  - 0.05~0.10 미만: 🟡 주의 필요  
  - 0.05 미만     : 🟢 적절  
  
- ※ GridSearchCV_RF가 정확도, F1, AUC 등 모든 주요 지표에서 가장 우수함을 확인할 수 있습니다.
+ ※ GridSearchCV_RF가 정확도, F1, AUC 등 주요 지표에서 가장 우수함을 확인할 수 있습니다.
 
 🔍 특성 중요도 분석 결과
 
 📊 최고 성능 모델 (GridSearchCV_RF) 특성 중요도
-- **분석 기준**             : F1 점수 0.6492로 최고 성능을 보인 GridSearchCV_RF 모델
+- **분석 기준**             : F1 점수 0.8761로 최고 성능을 보인 GridSearchCV_RF 모델
 - **전체 특성 수**          : 16개
 - **80% 중요도 달성 특성 수**: 9개
+
 
 🏆 상위 10개 중요 특성 (GridSearchCV_RF 기준)
 
@@ -691,13 +692,10 @@ Confusion Matrix   :
 
 ##### 3.4. XGBoost 모델 시각화
 
-1. 혼동 행렬 시각화
-<img width="513" height="470" alt="confusion_matrix_xgb" src="https://github.com/user-attachments/assets/f1dec48a-4b5e-4fad-97af-f85c19c36a9a" />
-
-2. 학습 곡선
+1. 학습 곡선
 <img width="575" height="432" alt="xgb_learning_curve" src="https://github.com/user-attachments/assets/19faa87f-921c-4341-9a40-53a8def9f111" />
 
-3. 특성 중요도
+2. 특성 중요도
 <img width="903" height="1009" alt="xgb_feature_importance" src="https://github.com/user-attachments/assets/21c2f390-3b79-48bb-b676-dd67fd06ff16" />
 
 **[모델 비교 분석 시각화 위치]**
@@ -1044,6 +1042,7 @@ Confusion Matrix   :
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
 
 
 
