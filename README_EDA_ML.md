@@ -580,10 +580,11 @@ Confusion Matrix   :
 ---
 
 #### 3. XGBoost
-**[XGBoost 결과 시각화 위치]**
-> *모델 성능 지표, 특성 중요도, 학습 곡선 등*
 
 ##### 3.1. 기본 XGBoost
+
+모델 설정
+
 ```python
 # XGB 모델 생성
 xgb_clf = XGBClassifier(
@@ -964,6 +965,7 @@ Confusion Matrix   :
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
 
 
 
