@@ -689,6 +689,17 @@ Confusion Matrix   :
                    [ 49  54]
 ```
 
+##### 3.4. XGBoost 모델 시각화
+
+1. 혼동 행렬 시각화
+<img width="513" height="470" alt="confusion_matrix_xgb" src="https://github.com/user-attachments/assets/f1dec48a-4b5e-4fad-97af-f85c19c36a9a" />
+
+2. 학습 곡선
+<img width="575" height="432" alt="xgb_learning_curve" src="https://github.com/user-attachments/assets/19faa87f-921c-4341-9a40-53a8def9f111" />
+
+3. 특성 중요도
+<img width="903" height="1009" alt="xgb_feature_importance" src="https://github.com/user-attachments/assets/21c2f390-3b79-48bb-b676-dd67fd06ff16" />
+
 **[모델 비교 분석 시각화 위치]**
 > *3개 모델의 성능 비교 차트, 혼동행렬 비교 등*
 
@@ -1033,6 +1044,7 @@ Confusion Matrix   :
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
 
 
 
