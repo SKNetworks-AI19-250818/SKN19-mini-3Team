@@ -1,8 +1,64 @@
-# 묘목 생존율 예측 모델 프로젝트
+# 🌳**묘목 생존율 예측 모델 프로젝트**🌳
+<div align="center">
+<img src="./data/dataset-cover.png" width="50%" height="50%" alt="Tree">
+</div>
 
-## 프로젝트 개요
+---
+
+## 👥 **팀 소개**
+
+<div align="center">
+
+### **🌿 가지가지팀 (SKN_19-mini-3Team) 🌿**
+
+<table>
+  <tr>
+    <td align="center" width="200px">
+      <img src="./data/team/junyung.jpg" width="120px" height="120px" alt="박준영" style="border-radius: 50%;"><br/>
+      <b>박준영</b>
+    </td>
+    <td align="center" width="200px">
+      <img src="./data/team/heungjae.jpg" width="120px" height="120px" alt="오흥재" style="border-radius: 50%;"><br/>
+      <b>오흥재</b>
+    </td>
+    <td align="center" width="200px">
+      <img src="./data/team/sangmin.jpg" width="120px" height="120px" alt="임상민" style="border-radius: 50%;"><br/>
+      <b>임상민</b>
+    </td>
+    <td align="center" width="200px">
+      <img src="./data/team/hyojung.jpg" width="120px" height="120px" alt="장효정" style="border-radius: 50%;"><br/>
+      <b>장효정</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="200px">
+      <a href="mailto:deneb784@gmail.com"> GitHub</a>
+    </td>
+    <td align="center" width="200px">
+      <a href="mailto:vfxpedia1987@kakao.com"> GitHub</a>
+    </td>
+    <td align="center" width="200px">
+      <a href="mailto:colaa222@gmail.com"> GitHub</a>
+    </td>
+    <td align="center" width="200px">
+      <a href="mailto:koulsh3663@gmail.com"> GitHub</a>
+    </td>
+  </tr>
+</table>
+
+</div>
+
+---
+
+
+## 프로젝트 목적과 개요
+사막화와 도시화의 가속화로 인해 전 세계적으로 녹지를 조성하고 숲을 재건하려는 노력이 활발히 이루어지고 있습니다. 이러한 과정에서 식재된 나무의 **생존율을 정확히 추정**하는 것은 조림 효과를 극대화하고, 자원 배분 및 관리 전략을 수립하는 데 핵심적인 요소로 작용합니다.
+   
 본 프로젝트는 묘목의 생존율을 예측하기 위한 머신러닝 모델을 개발하는 프로젝트입니다.
 초기의 단순 분류 모델에서 시작하여, 시간에 따른 생존율을 예측할 수 있는 고도화된 생존 분석 모델까지 구현하였습니다.
+
+위 모델을 통해 개별 개체의 생존율 예측 뿐만 아니라, 나무 개체군 전체의 생존율을 예측하여 효율성을 추구하는 것이 목표입니다.  
+
 
 ## 목차
 1. [EDA를 기반으로 한 데이터 전처리](#1-eda를-기반으로-한-데이터-전처리)
@@ -47,9 +103,6 @@ EDA를 통해 분석한 데이터를 기반으로 데이터 전처리 및 인코
 데이터 드랍 → 이상치 처리 → 결측치 처리 → 날짜값 통일 → 라벨 데이터 통합 → 인코딩
 ```
 
-**[데이터 분포 시각화 자료 위치]**
-> *데이터의 분포, 결측치 현황, 이상치 탐지 결과 등의 시각화 자료*
-
 ---
 
 ## 2. 분류 모델을 이용한 묘목의 생존 여부 예측
@@ -60,25 +113,42 @@ EDA를 통해 분석한 데이터를 기반으로 데이터 전처리 및 인코
 
 2 성장기가 지나면 생존율이 매우 안정화되므로, 해당 기간까지의 생존율 예측이 매우 중요합니다.
 
-**[실제 묘목의 생존율 그래프 위치]**
-> *시간에 따른 묘목 생존율 변화를 보여주는 그래프*
+<div align="center">
+<table>
+  <tr>
+    <td align="center" style="vertical-align: top; padding: 10px;">
+      <img src="./data/model_print/show_alive_about_time.png" 
+           style="max-width: 100%; height: auto; width: auto; object-fit: contain;"
+           alt="Random Forest 모델 성능 비교 분석">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>시간에 따른 나무의 생존율 그래프</em>
+    </td>
+  </tr>
+</table>
+</div>
 
 ### 사용 모델
 3개의 분류 모델을 사용하여 분류를 수행하였습니다:
 
 #### 1. Logistic Regression
-**[Logistic Regression 결과 시각화 위치]**
-> *모델 성능 지표, ROC 곡선, 특성 중요도 등*
 
 **주요 결과:**
-- 정확도: [수치]
-- 정밀도: [수치]
-- 재현율: [수치]
-- F1-score: [수치]
+```sh
+📈 Default Random Forest 상세 성능 지표
+============================================================
+Accuracy           : 0.7861
+Precision          : 0.8005
+Recall             : 0.9519
+F1 Score           : 0.8698
+Confusion Matrix   :
+                    [297 15]
+                    [ 74 30]
+```
 
 #### 2. Random Forest
-**[Random Forest 결과 시각화 위치]**
-> *모델 성능 지표, 특성 중요도, 트리 구조 등*
 
 ##### 2.1. 기본 랜덤포레스트
 
@@ -111,9 +181,9 @@ Cross Validation   : 0.7730 (±0.0507)
 📈 Default Random Forest 상세 성능 지표
 ============================================================
 Accuracy           : 0.8125
-Precision          : 0.7349
-Recall             : 0.5214
-F1 Score           : 0.6100
+Precision          : 0.8318
+Recall             : 0.9264
+F1 Score           : 0.8761
 Confusion Matrix   :
                    [277  22]
                    [ 56  61]
@@ -146,9 +216,9 @@ Cross Validation   : 0.7752 (±0.0101)
 📈 KFold Random Forest 상세 성능 지표
 ============================================================
 Accuracy           : 0.7865
-Precision          : 0.5843
-Recall             : 0.4483
-F1 Score           : 0.5073
+Precision          : 0.8333
+Recall             : 0.8969
+F1 Score           : 0.8643
 Confusion Matrix   :
                    [320  37]
                    [ 64  52]
@@ -183,9 +253,9 @@ Cross Validation   : 0.7861 (±0.0102)
 📈 StratifiedKFold Random Forest 상세 성능 지표
 ============================================================
 Accuracy           : 0.7949
-Precision          : 0.5824
-Recall             : 0.4732
-F1 Score           : 0.5222
+Precision          : 0.8456
+Recall             : 0.8948
+F1 Score           : 0.8694
 Confusion Matrix   :
                    [323  38]
                    [ 59  53]
@@ -240,9 +310,9 @@ Cross Validation   : 0.7899
 📈 GridSearchCV Random Forest 상세 성능 지표
 ============================================================
 Accuracy           : 0.8125
-Precision          : 0.7671
-Recall             : 0.4786
-F1 Score           : 0.5895
+Precision          : 0.8318
+Recall             : 0.9264
+F1 Score           : 0.8761
 Confusion Matrix   :
                    [277  22]
                    [ 56  61]
@@ -289,9 +359,9 @@ Cross Validation   : 0.7798 (±0.0536)
 📈 HyperOpt Random Forest 상세 성능 지표
 ============================================================
 Accuracy           : 0.8077
-Precision          : 0.7606
-Recall             : 0.4615
-F1 Score           : 0.5745
+Precision          : 0.8595
+Recall             : 0.8966
+F1 Score           : 0.8777
 Confusion Matrix   :
                    [286  33]
                    [ 47  50]
@@ -304,13 +374,13 @@ Confusion Matrix   :
 #### 2.6. 📊 Random Forest 모델 성능 비교 결과
 
 성능 비교 테이블:
-| Model              | Train_Score| Test_Score | CV_Mean   | CV_Std    | Accuracy | Precision| Recall   | F1_Score |
-|---------------------|-----------|------------|-----------|-----------|----------|----------|----------|----------|
-| **Default_RF**        | 0.9590    | 0.8221     | 0.7768    | 0.0565    | 0.8221   | 0.6744   | 0.5577   | 0.6105   |
-| **KFold_RF**          | 0.8694    | 0.8269     | 0.7718    | 0.0577    | 0.8269   | 0.6951   | 0.5481   | 0.6129   |
-| **StratifiedKFold_RF**| 0.9590    | 0.8293     | 0.7705    | 0.0601    | 0.8293   | 0.6854   | 0.5865   | 0.6321   |
-| **GridSearchCV_RF**   | 0.8960    | 0.8389     | 0.7726    | 0.0603    | 0.8389   | 0.7126   | 0.5962   | 0.6492   |
-| **HyperOpt_RF**       | 0.9210    | 0.8365     | 0.7781    | 0.0483    | 0.8365   | 0.7093   | 0.5865   | 0.6421   |
+| Model                  | Train_Score | Test_Score | CV_Mean | CV_Std | Accuracy | Precision | Recall | F1_Score |
+| ---------------------- | ----------- | ---------- | ------- | ------ | -------- | --------- | ------ | -------- |
+| **Default_RF**         | 0.9590      | 0.8221     | 0.7768  | 0.0565 | 0.8125   | 0.8318    | 0.9264 | 0.8761   |
+| **KFold_RF**           | 0.8694      | 0.8269     | 0.7718  | 0.0577 | 0.7865   | 0.8333    | 0.8969 | 0.8643   |
+| **StratifiedKFold_RF** | 0.9590      | 0.8293     | 0.7705  | 0.0601 | 0.7949   | 0.8456    | 0.8948 | 0.8694   |
+| **GridSearchCV_RF**    | 0.8960      | 0.8389     | 0.7726  | 0.0603 | 0.8125   | 0.8318    | 0.9264 | 0.8761   |
+| **HyperOpt_RF**        | 0.9210      | 0.8365     | 0.7781  | 0.0483 | 0.8077   | 0.8595    | 0.8966 | 0.8777   |
 
 ---
 
@@ -538,19 +608,17 @@ Training Score  : 0.8415046491969569
 Testing  Score  : 0.8173076923076923
 Cross Validation Score : 0.776831607211354
 ======================================================================================================================================================
-Accuracy        : 0.8173076923076923
-Confusion Matrix:
- [[286  27]
- [ 49  54]]
-Precision       : 0.6666666666666666
-Recall          : 0.5242718446601942
-F1 Score        : 0.5869565217391305
 ```
 **주요 결과:**
-- 정확도: [수치]
-- 정밀도: [수치]
-- 재현율: [수치]
-- F1-score: [수치]
+```sh
+Accuracy           : 0.8173
+Precision          : 0.8535
+Recall             : 0.9138
+F1 Score           : 0.8828
+Confusion Matrix   :
+                   [286  27]
+                   [ 49  54]
+```
 
 **[모델 비교 분석 시각화 위치]**
 > *3개 모델의 성능 비교 차트, 혼동행렬 비교 등*
@@ -831,13 +899,6 @@ Confusion Matrix   :
 2. **KFold를 이용한 모델의 정확도 측정**
 3. **GridSearchCV를 이용한 최적의 파라미터 탐색**
 
-**[모델 평가 과정 시각화 위치]**
-> *K-fold 교차검증 결과, 하이퍼파라미터 튜닝 과정 등*
-
-### 성능 고도화 기법
-**[최적화 결과 비교 시각화 위치]**
-> *파라미터 튜닝 전후 성능 비교, 최적 파라미터 조합 등*
-
 ---
 
 ## 6. 트러블 슈팅
@@ -846,10 +907,10 @@ Confusion Matrix   :
 
 #### 1. 생존율 모델 평가 방식의 문제
 **문제점:**
-- 생존율 모델의 경우 위험 점수를 기반으로 한 평가 방식으로는 기존 모델과 비교 불가
+- 생존율 모델의 경우 위험 점수를 기반으로 한 평가 방식으로는 기존 모델과 정확도 등 비교 불가
 
 **해결책:**
-- 위험 점수를 기반으로 모델을 이진 분류한 후 정확도를 계산하는 방식으로 기존 모델과 비교
+- 위험 점수를 기반으로 생존율을 추정, 생존율을 통해 이진 분류한 후 정확도를 계산하는 방식으로 기존 모델과 비교
 
 #### 2. 생존율 모델의 입력 데이터 구조 문제
 **문제점:**
@@ -888,7 +949,7 @@ Confusion Matrix   :
 ## 🛠️ 기술 스택
 - **데이터 분석**: Python, Pandas, NumPy
 - **시각화**: Matplotlib, Seaborn
-- **머신러닝**: Scikit-learn
+- **머신러닝**: Scikit-learn, Scikit-Survival
 - **하이퍼파라미터 튜닝**: GridSearchCV, HyperOpt
 - **모델 평가**: KFold, StratifiedKFold, Cross Validation
 
@@ -903,6 +964,7 @@ Confusion Matrix   :
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
 
 
 
