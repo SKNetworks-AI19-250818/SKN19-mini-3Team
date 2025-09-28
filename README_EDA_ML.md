@@ -584,7 +584,6 @@ Confusion Matrix   :
 ##### 3.1. 기본 XGBoost
 
 모델 설정
-
 ```python
 # XGB 모델 생성
 xgb_clf = XGBClassifier(
@@ -598,18 +597,87 @@ xgb_clf = XGBClassifier(
 # 학습
 xgb_clf.fit(X_train, y_train)
 
-# 훈련모델 평가 출력
-train_model_evaluation(xgb_clf, X_train, y_train, X_test, y_test)
+# 정확도
+print(accuracy_score(y_train, y_pred_train))
+print(accuracy_score(y_test, y_pred_test))
 
-# 평가지표 출력
-evaluate_binary_classification(y_test, y_pred)
+# 혼동 행렬
+print(confusion_matrix(y_test, y_pred_test)) 
+print(classification_report(y_test, y_pred_test)) 
 ```
+모델 결과
 ```sh
-Training Score  : 0.8415046491969569
-Testing  Score  : 0.8173076923076923
-Cross Validation Score : 0.776831607211354
-======================================================================================================================================================
+0.8415046491969569
+0.8173076923076923
+[[286  27]
+ [ 49  54]]
+              precision    recall  f1-score   support
+
+           0       0.85      0.91      0.88       313
+           1       0.67      0.52      0.59       103
+
+    accuracy                           0.82       416
+   macro avg       0.76      0.72      0.73       416
+weighted avg       0.81      0.82      0.81       416
 ```
+##### 3.2. KFold XGBoost 모델 
+
+모델 설정
+```python
+# 모델 생성
+kfold = KFold(n_splits=5, shuffle=True, random_state=42)
+
+# 결과 출력
+print("훈련별 정확도:", cv_accuracy)
+print("분류모델 평균 정확도:", np.mean(cv_accuracy))
+```
+
+모델 결과
+```sh
+훈련별 정확도: [0.770042194092827, 0.8097251585623678, 0.7885835095137421, 0.7885835095137421, 0.7864693446088795]
+분류모델 평균 정확도: 0.7886807432583117
+```
+##### 3.3. GridSearchCV XGBoost 모델 
+
+모델 설정
+```python
+# 파라미터 설정
+params = { 
+    'n_estimators' : range(100, 1000, 100),
+    'max_depth' : range(1, 10, 1),
+    'learning_rate' : np.arange(0.01, 0.1, 0.01), 
+    'enable_categorical' : [True, False] 
+}
+
+# 모델 생성
+grid = GridSearchCV(xgb_clf, params, scoring="accuracy", cv=5)
+
+# 학습
+grid.fit(X_train, y_train)
+```
+
+최적의 파라미터 모델 설정
+```python
+# 모델 설정
+xgb_grid = XGBClassifier(
+    n_estimators=900,
+    max_depth=2,
+    learning_rate=0.04,
+    random_state=42, 
+    enable_categorical=True 
+)
+
+# 정확도 출력
+print(accuracy_score(y_train, y_pred_train))
+print(accuracy_score(y_test, y_pred_test))
+```
+
+모델 결과
+```sh
+0.8558748943364328
+0.8389423076923077
+```
+
 **주요 결과:**
 ```sh
 Accuracy           : 0.8173
@@ -965,6 +1033,7 @@ Confusion Matrix   :
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
 
 
 
