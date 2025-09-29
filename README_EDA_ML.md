@@ -58,6 +58,41 @@
 초기의 단순 분류 모델에서 시작하여, 시간에 따른 생존율을 예측할 수 있는 고도화된 생존 분석 모델까지 구현하였습니다.
 
 위 모델을 통해 개별 개체의 생존율 예측 뿐만 아니라, 나무 개체군 전체의 생존율을 예측하여 효율성을 추구하는 것이 목표입니다.  
+## 프로젝트 구조
+
+```sh
+SKN19-mini-3Team/
+├── data/
+│   └── Tree_Data.csv      # 나무 데이터
+├── modules/
+│   ├── DataAnalysis.py          # 데이터 분석
+│   │   ├── DataCheck            # 데이터 분석 및 이상치 확인
+│   │   ├── DataPreprocessing    # 데이터 전처리
+│   │   └── DataVisualize        # 데이터 시각화
+│   ├── DataModify.py                           # 데이터 정제
+│   │   ├── return_cols                         # 연속형 / 범주형 컬럼 반환
+│   │   ├── data_anomaly_edit                   # 이상치 제거 및 수정
+│   │   ├── split_feature_label                 # feature와 label을 분리
+│   │   ├── scale_data                          # 데이터 스케일링
+│   │   ├── train_test_split_ignore_censored    # 검열값을 무시하고 데이터 분리 후 검열값 처리
+│   │   └── split_data_X_y_e                    # features, time, event로 데이터 분리
+│   ├── ModelAnalysis.py                    # 모델 분석
+│   │   ├── calculate_metrics               # 정확도 수치 계산
+│   │   ├── show_alive_about_time           # 생존율 그래프 출력
+│   │   ├── compare_km_and_model            # km 함수 출력
+│   │   ├── rsf_score_over_time             # 시간에 따른 모델 그래프 출력
+│   │   ├── compare_real_vs_pred_alive_dead # 예측한 생존율 그래프와 실제 그래프 비교
+│   │   └── show_confusion_matrix           # confusion matrix 시각화
+│   └── TreeModels.py                  # 모델 구현
+│       ├── TreeXGBoostCox             # Cox를 사용한 XGBoost
+│       └── TreeRandomForestSurvivial  # Random Forest Survival
+├── EDA_main.ipynb
+├── model_run.ipynb
+├── model_test_Logistic.ipynb
+├── model_test_RandomForest.ipynb
+└── model_test_xgb.ipynb
+
+```
 
 
 ## 목차
@@ -94,7 +129,7 @@ EDA를 통해 분석한 데이터를 기반으로 데이터 전처리 및 인코
 | **Lignin** | 리그닌의 비율 |
 | **NSC** | NSC의 비율 |
 | **Time** | 사건(사망 혹은 측정 종료)가 발생한 시간 |
-| **Alive** | 사건 종류 (생존/사망) |
+| **Alive** | 사건 종류 (생존/측정 중단/사망) |
 
 ### 전처리 과정
 다음과 같은 순서로 데이터 전처리를 진행하였습니다:
@@ -1042,6 +1077,7 @@ Confusion Matrix   :
 ## 데이터셋 정보
 - **Tree_Data.csv**: 원본 데이터 (2,783행 × 24열)
 - **Tree_Data_processing.csv**: 전처리된 데이터 (2,783행 × 16열)
+
 
 
 
